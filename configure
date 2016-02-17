@@ -349,3 +349,5 @@ sed -e '
   s,@ARCH@,'"$opt_arch"',g
   s,@BITS@,'"$opt_bits"',g
 ' < Makefile.in > Makefile
+
+sed -i -e 's/\-[f]*pie//g' Makefile
