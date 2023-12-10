@@ -43,6 +43,7 @@ static struct pseudo_variables pseudo_env[] = {
 	{ "PSEUDO_BINDIR", 13, NULL },
 	{ "PSEUDO_LIBDIR", 13, NULL },
 	{ "PSEUDO_LOCALSTATEDIR", 20, NULL },
+	{ "PSEUDO_INCLUDE_PATHS", 20, NULL },
 	{ "PSEUDO_IGNORE_PATHS", 19, NULL },
 	{ "PSEUDO_PASSWD", 13, NULL },
 	{ "PSEUDO_CHROOT", 13, NULL },

@@ -1566,6 +1566,28 @@ int pseudo_client_ignore_path_chroot(const char *path, int ignore_chroot) {
 	if (ignore_chroot && pseudo_chroot && strncmp(path, pseudo_chroot, pseudo_chroot_len) == 0)
 		return 0;
 
+	env = pseudo_get_value("PSEUDO_INCLUDE_PATHS");
+	if (env) {
+		char *p = env;
+		if (*path == '\0') {
+			free(env);
+			return 0;
+		}
+		while (p) {
+			char *next = strchr(p, ',');
+			if (next)
+				*next++ = '\0';
+			if (*p && !strncmp(path, p, strlen(p))) {
+				free(env);
+				return 0;
+			}
+			p = next;
+		}
+		pseudo_debug(PDBGF_PATH | PDBGF_VERBOSE, "ignoring path: '%s'\n", path);
+		free(env);
+		return 1;
+        }
+
 	env = pseudo_get_value("PSEUDO_IGNORE_PATHS");
 	if (!env)
 		return 0;
