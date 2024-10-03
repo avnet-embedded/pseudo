@@ -1051,7 +1051,7 @@ pseudo_setupenvp(char * const *envp) {
 	free(pseudo_get_libdir());
 	free(pseudo_get_localstatedir());
 
-	for (i = 0; envp[i]; ++i) {
+	for (i = 0; envp && envp[i]; ++i) {
 		if (STARTSWITH(envp[i], PRELINK_LIBRARIES "=")) {
 			ld_preload = envp[i];
 		}
@@ -1113,7 +1113,7 @@ pseudo_setupenvp(char * const *envp) {
 
 	free(libdir_path);
 
-	for (i = 0; envp[i]; ++i) {
+	for (i = 0; envp && envp[i]; ++i) {
 		if (STARTSWITH(envp[i], PRELINK_LIBRARIES "=")) continue;
 		if (STARTSWITH(envp[i], PRELINK_PATH "=")) continue;
 		new_envp[j++] = envp[i];
