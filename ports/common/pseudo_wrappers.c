@@ -411,3 +411,98 @@ wrap_fork(void) {
 	return rc;
 }
 
+
+int
+posix_spawn(pid_t *pid, const char *path, const posix_spawn_file_actions_t *file_actions, const posix_spawnattr_t *attrp, char *const *argv, char *const *envp) {
+	sigset_t saved;
+
+	int rc = -1;
+	PROFILE_START;
+
+	if (!pseudo_check_wrappers() || !real_posix_spawn) {
+		/* rc was initialized to the "failure" value */
+		pseudo_enosys("posix_spawn");
+		PROFILE_DONE;
+		return rc;
+	}
+
+	pseudo_debug(PDBGF_WRAPPER, "called: posix_spawn\n");
+	pseudo_sigblock(&saved);
+	if (pseudo_getlock()) {
+		errno = EBUSY;
+		sigprocmask(SIG_SETMASK, &saved, NULL);
+		PROFILE_DONE;
+		return -1;
+	}
+
+	int save_errno;
+
+	/* exec*() use this to restore the sig mask */
+	pseudo_saved_sigmask = saved;
+	rc = wrap_posix_spawn(pid, path, file_actions, attrp, argv, envp);
+
+	save_errno = errno;
+	pseudo_droplock();
+	sigprocmask(SIG_SETMASK, &saved, NULL);
+	pseudo_debug(PDBGF_WRAPPER, "completed: posix_spawn\n");
+	errno = save_errno;
+	PROFILE_DONE;
+	return rc;
+}
+
+int
+posix_spawnp(pid_t *pid, const char *file, const posix_spawn_file_actions_t *file_actions, const posix_spawnattr_t *attrp, char *const *argv, char *const *envp) {
+	sigset_t saved;
+
+	int rc = -1;
+	PROFILE_START;
+
+	if (!pseudo_check_wrappers() || !real_posix_spawnp) {
+		/* rc was initialized to the "failure" value */
+		pseudo_enosys("posix_spawn");
+		PROFILE_DONE;
+		return rc;
+	}
+
+	pseudo_debug(PDBGF_WRAPPER, "called: posix_spawnp\n");
+	pseudo_sigblock(&saved);
+	if (pseudo_getlock()) {
+		errno = EBUSY;
+		sigprocmask(SIG_SETMASK, &saved, NULL);
+		PROFILE_DONE;
+		return -1;
+	}
+
+	int save_errno;
+
+	/* exec*() use this to restore the sig mask */
+	pseudo_saved_sigmask = saved;
+	rc = wrap_posix_spawnp(pid, file, file_actions, attrp, argv, envp);
+
+	save_errno = errno;
+	pseudo_droplock();
+	sigprocmask(SIG_SETMASK, &saved, NULL);
+	pseudo_debug(PDBGF_WRAPPER, "completed: posix_spawnp\n");
+	errno = save_errno;
+	PROFILE_DONE;
+	return rc;
+}
+
+
+static int
+wrap_posix_spawn(pid_t *pid, const char *path, const posix_spawn_file_actions_t *file_actions, const posix_spawnattr_t *attrp, char *const *argv, char *const *envp) {
+	int rc = -1;
+
+#include "guts/posix_spawn.c"
+
+	return rc;
+}
+
+static int
+wrap_posix_spawnp(pid_t *pid, const char *file, const posix_spawn_file_actions_t *file_actions, const posix_spawnattr_t *attrp, char *const *argv, char *const *envp) {
+	int rc = -1;
+
+#include "guts/posix_spawnp.c"
+
+	return rc;
+}

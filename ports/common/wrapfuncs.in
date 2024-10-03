@@ -5,3 +5,5 @@ int execv(const char *file, char *const *argv); /* hand_wrapped=1 */
 int execve(const char *file, char *const *argv, char *const *envp); /* hand_wrapped=1 */
 int execvp(const char *file, char *const *argv); /* hand_wrapped=1 */
 int fork(void); /* hand_wrapped=1 */
+int posix_spawn(pid_t *pid, const char *path, const posix_spawn_file_actions_t *file_actions, const posix_spawnattr_t *attrp, char *const *argv, char *const *envp); /* hand_wrapped=1 */
+int posix_spawnp(pid_t *pid, const char *file, const posix_spawn_file_actions_t *file_actions, const posix_spawnattr_t *attrp, char *const *argv, char *const *envp); /* hand_wrapped=1 */
