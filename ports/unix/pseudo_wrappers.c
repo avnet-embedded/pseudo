@@ -52,3 +52,13 @@ wrap_popen(const char *command, const char *mode) {
 	return rc;
 }
 
+
+#undef NFTW_NAME
+#undef NFTW_STAT_NAME
+#undef NFTW_STAT_STRUCT
+#undef NFTW_LSTAT_NAME
+#define NFTW_NAME nftw
+#define NFTW_STAT_NAME stat
+#define NFTW_STAT_STRUCT stat
+#define NFTW_LSTAT_NAME lstat
+#include "guts/nftw_wrapper_base.c"

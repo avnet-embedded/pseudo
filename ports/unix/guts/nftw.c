@@ -9,7 +9,7 @@
  *	int rc = -1;
  */
 
-	rc = real_nftw(path, fn, nopenfd, flag);
+	rc = pseudo_nftw(path, fn, nopenfd, flag);
 
 /*	return rc;
  * }

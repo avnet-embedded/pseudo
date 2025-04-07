@@ -96,6 +96,8 @@ wrappers:
 	freopen64
 	mkstemp
 	mkstemp64
+	nftw64
+	nftw
 	fcntl
 	fork
 	link
@@ -136,8 +138,6 @@ calling the underlying routine.
 	lutimes
 	mkdtemp
 	mktemp
-	nftw64
-	nftw
 	opendir
 	pathconf
 	readlinkat

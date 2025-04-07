@@ -148,3 +148,13 @@ static int wrap_prctl(int option, va_list ap) {
 	(void) ap;
 	return -1;
 }
+
+#undef NFTW_NAME
+#undef NFTW_STAT_NAME
+#undef NFTW_STAT_STRUCT
+#undef NFTW_LSTAT_NAME
+#define NFTW_NAME nftw64
+#define NFTW_STAT_NAME stat64
+#define NFTW_STAT_STRUCT stat64
+#define NFTW_LSTAT_NAME lstat64
+#include "../unix/guts/nftw_wrapper_base.c"
