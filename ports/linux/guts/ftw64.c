@@ -9,7 +9,14 @@
  *	int rc = -1;
  */
 
-	rc = real_ftw64(path, fn, nopenfd);
+	// 1. Set the flag argument to 0, just like glibc does.
+	// 2. The difference between ftw and nftw callback
+	//    is only the last parameter: struct FTW is only used
+	//    by nftw(), and it is missing from ftw().
+	//    However since otherwise the stacklayout for the
+	//    functions is the same, this cast should work just the
+	//    way we want it. This is also borrowed from glibc.
+	rc = wrap_nftw64(path, (void *)fn, nopenfd, 0);
 
 /*	return rc;
  * }
