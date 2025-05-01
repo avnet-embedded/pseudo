@@ -51,6 +51,7 @@ int setresuid(uid_t ruid, uid_t euid, uid_t suid);
 int getresgid(gid_t *rgid, gid_t *egid, gid_t *sgid);
 int getresuid(uid_t *ruid, uid_t *euid, uid_t *suid);
 int scandir(const char *path, struct dirent ***namelist, int (*filter)(const struct dirent *), int (*compar)());
+char *tmpnam(char s[L_tmpnam]);
 int getgroups(int size, gid_t *list);
 int lckpwdf(void);
 int ulckpwdf(void);
@@ -64,3 +65,5 @@ int renameat2(int olddirfd, const char *oldpath, int newdirfd, const char *newpa
 int prctl(int option, ...); /* hand_wrapped=1 */
 int close_range(unsigned int lowfd, unsigned int maxfd, int flags);
 void closefrom(int fd);
+int lutimes(const char *path, const struct timeval tv[2]); /* flags=AT_SYMLINK_NOFOLLOW */
+int utimes(const char *path, const struct timeval tvp[2]);

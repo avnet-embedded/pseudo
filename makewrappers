@@ -104,6 +104,7 @@ class Argument:
         """get the type and name of a trivial C declaration"""
         self.vararg = False
         self.function_pointer = False
+        self.array = False
         self.spacer = ''
         
         if text == 'void':
@@ -134,14 +135,20 @@ class Argument:
             self.type = match.group(1)
             self.name = match.group(2).rstrip()
         else:
-            # plain declaration
-            match = re.match(r'(.*[ *])\(?\*?([a-zA-Z0-9$_]*)\)?', text)
-            # there may not be a match, say in the special case
-            # where an arg is '...'
+            # Is this an array?
+            match = re.match(r'(.*[ *])\(?\*?([a-zA-Z0-9$_]*)\)?(\[.*\])', text)
             if match:
-                self.type, self.name = match.group(1).rstrip(), match.group(2)
+                self.array = True
+                self.type, self.name, self.args = match.group(1).rstrip(), match.group(2), match.group(3)
             else:
-                self.type, self.name = None, None
+                # plain declaration
+                match = re.match(r'(.*[ *])\(?\*?([a-zA-Z0-9$_]*)\)?', text)
+                # there may not be a match, say in the special case
+                # where an arg is '...'
+                if match:
+                    self.type, self.name = match.group(1).rstrip(), match.group(2)
+                else:
+                    self.type, self.name = None, None
 
         # spacing between type and name, needed if type ends with a character
         # which could be part of an identifier
@@ -153,6 +160,8 @@ class Argument:
         if self.function_pointer:
             decl = "%s%s(*%s)(%s)" % \
                    (self.type, self.spacer, self.name, self.args)
+        elif self.array:
+            decl = "%s%s%s%s" % (self.type, self.spacer, self.name, self.args)
         else:
             decl = "%s%s%s" % (self.type, self.spacer, self.name)
 
