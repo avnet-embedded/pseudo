@@ -822,7 +822,7 @@ pseudo_fix_path(const char *base, const char *path, size_t rootlen, size_t basel
 	 * with it. 
 	 */
 	if ((pathlen + baselen) >= newpathlen) {
-		return path;
+		return (char *)path;
 	}
 	if (!pathbufs[pathbuf]) {
 		pathbufs[pathbuf] = malloc(newpathlen);
