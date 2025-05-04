@@ -212,7 +212,7 @@ main(int argc, char *argv[]) {
 			opt_S = 1;
 			break;
 		case 't': /* timeout */
-			pseudo_server_timeout = strtol(optarg, &s, 10);
+			pseudo_server_timeout = pseudo_strtol_wrapper(optarg, &s, 10);
 			if (*s && !isspace(*s)) {
 				pseudo_diag("Timeout must be an integer value.\n");
 				usage(EXIT_FAILURE);

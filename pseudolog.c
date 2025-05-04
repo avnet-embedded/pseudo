@@ -452,7 +452,7 @@ plog_trait(int opt, char *string) {
 	case PSQF_GID:
 	case PSQF_INODE:
 	case PSQF_UID:
-		new_trait->data.ivalue = strtoll(string, &endptr, 0);
+		new_trait->data.ivalue = pseudo_strtoll_wrapper(string, &endptr, 0);
 		if (*endptr) {
 			pseudo_diag("Unexpected garbage after number (%llu): '%s'\n",
 				new_trait->data.ivalue, endptr);
@@ -462,7 +462,7 @@ plog_trait(int opt, char *string) {
 		break;
 	case PSQF_MODE:
 	case PSQF_PERM:
-		new_trait->data.ivalue = strtoll(string, &endptr, 8);
+		new_trait->data.ivalue = pseudo_strtoll_wrapper(string, &endptr, 8);
 		if (!*endptr) {
 			break;
 		}

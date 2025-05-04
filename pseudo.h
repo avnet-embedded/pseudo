@@ -85,6 +85,10 @@ extern int pseudo_etc_file(const char *filename, char *realname, int flags, cons
 extern void pseudo_stat32_from64(struct stat *, const struct stat64 *);
 extern void pseudo_stat64_from32(struct stat64 *, const struct stat *);
 
+extern long pseudo_strtol_wrapper(const char *, char **, int);
+extern long long pseudo_strtoll_wrapper(const char *, char **, int);
+extern int pseudo_atoi_wrapper(const char *);
+
 extern char *pseudo_version;
 
 #ifndef PSEUDO_BINDIR

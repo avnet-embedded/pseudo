@@ -57,7 +57,7 @@ SOURCES=$(wildcard *.c)
 OBJS=$(subst .c,.o,$(SOURCES))
 TESTS=$(patsubst %.c,%,$(wildcard test/*.c))
 
-SHOBJS=pseudo_tables.o pseudo_util.o
+SHOBJS=pseudo_tables.o pseudo_util.o strtol.o
 DBOBJS=pseudo_db.o
 WRAPOBJS=pseudo_wrappers.o
 
@@ -100,15 +100,15 @@ $(BIN) $(LIB):
 
 pseudo: $(PSEUDO)
 
-$(PSEUDO): pseudo.o $(SHOBJS) $(DBOBJS) pseudo_client.o pseudo_server.o pseudo_ipc.o | $(BIN)
+$(PSEUDO): pseudo.o $(SHOBJS) $(DBOBJS) pseudo_client.o pseudo_client_scanf.o pseudo_server.o pseudo_ipc.o | $(BIN)
 	$(CC) $(CFLAGS) $(CFLAGS_PSEUDO) -o $(PSEUDO) \
-		pseudo.o pseudo_server.o pseudo_client.o pseudo_ipc.o \
+		pseudo.o pseudo_server.o pseudo_client.o pseudo_client_scanf.o pseudo_ipc.o \
 		$(DBOBJS) $(SHOBJS) $(LDFLAGS) $(DB_LDFLAGS) $(CLIENT_LDFLAGS)
 
 pseudolog: $(PSEUDOLOG)
 
-$(PSEUDOLOG): pseudolog.o $(SHOBJS) $(DBOBJS) pseudo_client.o pseudo_ipc.o | $(BIN)
-	$(CC) $(CFLAGS) $(CFLAGS_PSEUDO) -o $(PSEUDOLOG) pseudolog.o pseudo_client.o pseudo_ipc.o \
+$(PSEUDOLOG): pseudolog.o $(SHOBJS) $(DBOBJS) pseudo_client.o pseudo_client_scanf.o pseudo_ipc.o | $(BIN)
+	$(CC) $(CFLAGS) $(CFLAGS_PSEUDO) -o $(PSEUDOLOG) pseudolog.o pseudo_client.o pseudo_client_scanf.o pseudo_ipc.o \
 		$(DBOBJS) $(SHOBJS) $(LDFLAGS) $(DB_LDFLAGS) $(CLIENT_LDFLAGS)
 
 pseudodb: $(PSEUDODB)
@@ -119,9 +119,9 @@ $(PSEUDODB): pseudodb.o $(SHOBJS) $(DBOBJS) pseudo_ipc.o | $(BIN)
 
 libpseudo: $(LIBPSEUDO)
 
-$(LIBPSEUDO): $(WRAPOBJS) pseudo_client.o pseudo_ipc.o $(SHOBJS) | $(LIB)
+$(LIBPSEUDO): $(WRAPOBJS) pseudo_client.o pseudo_client_scanf.o pseudo_ipc.o $(SHOBJS) | $(LIB)
 	$(CC) $(CFLAGS) $(CFLAGS_PSEUDO) -shared -o $(LIBPSEUDO) \
-		pseudo_client.o pseudo_ipc.o \
+		pseudo_client.o pseudo_client_scanf.o pseudo_ipc.o \
 		$(WRAPOBJS) $(SHOBJS) $(LDFLAGS) $(CLIENT_LDFLAGS)
 
 # *everything* now relies on stuff that's generated in the
@@ -134,6 +134,8 @@ $(OBJS): pseudo_tables.h
 pseudo_client.o pseudo_server.o pseudo_ipc.o: pseudo_ipc.h
 
 pseudo_client.o: pseudo_client.h
+
+pseudo_client_scanf.o: pseudo_client.h
 
 pseudo_server.o: pseudo_server.h
 

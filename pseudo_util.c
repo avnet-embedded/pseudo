@@ -229,7 +229,7 @@ pseudo_init_util(void) {
 	env = pseudo_get_value("PSEUDO_DEBUG");
 	if (env) {
 		int i;
-		int level = atoi(env);
+		int level = pseudo_atoi_wrapper(env);
 		if (level > 0) {
 			for (i = 0; i < level; ++i) {
 				pseudo_debug_verbose();

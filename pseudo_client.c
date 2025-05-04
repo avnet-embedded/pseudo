@@ -614,7 +614,7 @@ pseudo_init_client(void) {
 			 * at all.
 			 */
 			if (*env) {
-				pseudo_nosymlinkexp = strtol(env, &endptr, 10);
+				pseudo_nosymlinkexp = pseudo_strtol_wrapper(env, &endptr, 10);
 				if (*endptr)
 					pseudo_nosymlinkexp = 1;
 			} else {
@@ -624,20 +624,9 @@ pseudo_init_client(void) {
 			pseudo_nosymlinkexp = 0;
 		}
 		free(env);
-		env = pseudo_get_value("PSEUDO_UIDS");
-		if (env)
-			sscanf(env, "%d,%d,%d,%d",
-				&pseudo_ruid, &pseudo_euid,
-				&pseudo_suid, &pseudo_fuid);
-		free(env);
 
-		env = pseudo_get_value("PSEUDO_GIDS");
-		if (env)
-			sscanf(env, "%d,%d,%d,%d",
-				&pseudo_rgid, &pseudo_egid,
-				&pseudo_sgid, &pseudo_fuid);
-		free(env);
-
+		readenv_uids();
+		readenv_gids();
 		env = pseudo_get_value("PSEUDO_CHROOT");
 		if (env) {
 			pseudo_chroot = strdup(env);
@@ -1030,7 +1019,7 @@ client_spawn_server(void) {
 			pseudo_pidfile = pseudo_localstatedir_path(PSEUDO_PIDFILE);
 			fp = fopen(pseudo_pidfile, "r");
 			if (fp) {
-				if (fscanf(fp, "%d", &server_pid) != 1) {
+				if (read_pidfile(fp, &server_pid) != 1) {
 					pseudo_debug(PDBGF_CLIENT, "Opened server PID file, but didn't get a pid.\n");
 				}
 				fclose(fp);
@@ -1295,7 +1284,7 @@ pseudo_client_setup(void) {
 	fp = fopen(pseudo_pidfile, "r");
 	free(pseudo_pidfile);
 	if (fp) {
-		if (fscanf(fp, "%d", &server_pid) != 1) {
+		if (read_pidfile(fp, &server_pid) != 1) {
 			pseudo_debug(PDBGF_CLIENT, "Opened server PID file, but didn't get a pid.\n");
 		}
 		fclose(fp);

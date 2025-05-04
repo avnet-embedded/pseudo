@@ -55,7 +55,7 @@
 		errno = ENOSYS;
 		return -1;
 #endif
-		tmpfile_fd = atoi(oldpath + 14);
+		tmpfile_fd = pseudo_atoi_wrapper(oldpath + 14);
 		// call actual link
 		rc = real_linkat(AT_FDCWD, oldpath, AT_FDCWD, newpath, AT_SYMLINK_FOLLOW);
 	} else

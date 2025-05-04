@@ -74,6 +74,10 @@ extern int pseudo_nosymlinkexp;
 
 extern int pseudo_umask;
 
+extern void readenv_uids(void);
+extern void readenv_gids(void);
+extern int read_pidfile(FILE *, int *);
+
 /* Root can read and write files, and enter directories which have no
  * read, write, or execute permissions.  (But can't execute files without
  * execute permissions!)
