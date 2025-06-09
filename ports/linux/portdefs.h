@@ -36,7 +36,7 @@ GLIBC_COMPAT_SYMBOL(memcpy,2.0);
 #include <linux/seccomp.h>
 
 #ifndef _STAT_VER
-#if defined (__aarch64__)
+#if defined (__aarch64__) || defined (__riscv)
 #define _STAT_VER 0
 #elif defined (__x86_64__)
 #define _STAT_VER 1
@@ -45,7 +45,7 @@ GLIBC_COMPAT_SYMBOL(memcpy,2.0);
 #endif
 #endif
 #ifndef _MKNOD_VER
-#if defined (__aarch64__)
+#if defined (__aarch64__) || defined(__riscv)
 #define _MKNOD_VER 0
 #elif defined (__x86_64__)
 #define _MKNOD_VER 0
