@@ -2164,7 +2164,7 @@ pdb_update_inode(pseudo_msg_t *msg) {
 	int found_existing;
 
 	if (!oldmsg) {
-		oldmsg = malloc(pseudo_path_max());
+		oldmsg = malloc(sizeof(*msg) + pseudo_path_max());
 	}
 
 	char *sql = "UPDATE files "
@@ -2188,7 +2188,7 @@ pdb_update_inode(pseudo_msg_t *msg) {
 		pseudo_diag("Can't update the inode of a file without its path.\n");
 		return 1;
 	}
-	memcpy(oldmsg, msg, sizeof(msg) + msg->pathlen);
+	memcpy(oldmsg, msg, sizeof(*msg) + msg->pathlen);
 	found_existing = !pdb_find_file_path(oldmsg);
 	if (found_existing) {
 		/* we have an existing file entry */
