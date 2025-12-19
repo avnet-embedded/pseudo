@@ -14,6 +14,15 @@
 		errno = ENAMETOOLONG;
 		return NULL;
 	}
+
+	/* We must fail if the target path doesn't exist. */
+	PSEUDO_STATBUF buf;
+
+	if (base_lstat(rname, &buf) == -1) {
+		errno = EINVAL;
+		return NULL;
+	}
+
 		len = strlen(rname);
 		char *ep = rname + len - 1;
 		while (ep > rname && *ep == '/') {
