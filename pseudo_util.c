@@ -614,12 +614,40 @@ pseudo_append_element(char *newpath, char *root, size_t allocated, char **pcurre
 	size_t curlen;
 	int is_dir = S_ISDIR(buf->st_mode);
 	char *current;
+#ifdef PSEUDO_PORT_LINUX
+	int is_proc = 0;
+	char *proc_path = NULL;
+#endif
 	if (!newpath ||
 	    !pcurrent || !*pcurrent ||
 	    !root || !element) {
 		pseudo_diag("pseudo_append_element: invalid args.\n");
 		return -1;
 	}
+
+#ifdef PSEUDO_PORT_LINUX
+	/* If we end up resolving a path into /proc, it has special meaning.
+	 * For instance, /dev/fd/0 -> /proc/self/fd/0 ->
+	 *    /proc/1475524/fd/0 -> /proc/1475524/fd/pipe:[1177004485]
+	 * Trying to access the resolved name "pipe:[....]" may fail.
+	 *
+	 * We verify each link target and only expand if it exists.
+	 */
+	if (strncmp(newpath, "/proc/", 6) == 0) {
+		pseudo_debug(PDBGF_PATH | PDBGF_VERBOSE, "paes: %s in /proc\n",
+			newpath ? newpath : "<nil>");
+		/* Store off the path for later */
+		proc_path = strdup(newpath);
+		/* If memory can't be allocated for newpath,
+		 * fall through and do standard processing
+		 */
+		if (!proc_path)
+			pseudo_diag("allocation failed seeking memory for path (%s).\n", newpath);
+		else
+			is_proc = 1;
+	}
+#endif
+
 	current = *pcurrent;
 	pseudo_debug(PDBGF_PATH | PDBGF_VERBOSE, "pae: '%s', + '%.*s', is_dir %d\n",
 		newpath, (int) elen, element, is_dir);
@@ -700,6 +728,33 @@ pseudo_append_element(char *newpath, char *root, size_t allocated, char **pcurre
 			if (*linkbuf == '/') {
 				current = root;
 			} else {
+#ifdef PSEUDO_PORT_LINUX
+				if (is_proc) {
+					/* Check that the link target exists, otherwise stop resolving since /proc is special! */
+					PSEUDO_STATBUF statbuf;
+
+					size_t target_link_max = pseudo_path_max();
+					char *target_link_path = malloc(pseudo_path_max());
+
+					if (!target_link_path)
+						pseudo_diag("allocation failed seeking memory for path (%s/%s).\n", proc_path, linkbuf);
+						/* Fall through, nothing we can do here */
+					else {
+						snprintf(target_link_path, target_link_max, "%s/%s", proc_path, linkbuf);
+
+						if (!pseudo_real_lstat || (pseudo_real_lstat(target_link_path, &statbuf) == -1)) {
+							pseudo_debug(PDBGF_PATH, "proc link (%s) target (%s) does not exist, skipping.\n", newpath, target_link_path);
+							free(target_link_path);
+							free(proc_path);
+							*pcurrent = current;
+							return 1;
+						} else
+							pseudo_debug(PDBGF_PATH, "proc link (%s) target (%s) exists.\n", newpath, target_link_path);
+
+						free(target_link_path);
+					}
+				}
+#endif
 				/* point back at the end of the previous path... */
 				current -= (elen + 1);
 			}
@@ -716,13 +771,26 @@ pseudo_append_element(char *newpath, char *root, size_t allocated, char **pcurre
 			++link_recursion;
 			retval = pseudo_append_elements(newpath, root, allocated, pcurrent, linkbuf, linklen, 0, buf);
 			--link_recursion;
+
+#ifdef PSEUDO_PORT_LINUX
+			if (is_proc)
+				free(proc_path);
+#endif
+
 			return retval;
 		}
 	}
+
 	/* we used to always append a slash here. now we don't; append_elements
 	 * handles slashes, so just update the pointer.
 	 */
 	*pcurrent = current;
+
+#ifdef PSEUDO_PORT_LINUX
+	/* We must not have used this to get here... */
+	if (is_proc)
+		free(proc_path);
+#endif
 	return 1;
 }
 
