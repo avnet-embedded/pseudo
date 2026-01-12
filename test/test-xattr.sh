@@ -7,6 +7,23 @@
 #              1 - Invalid return value
 #              0 - Pass
 
+set -u
+
+rc=0
+which getfattr 2>/dev/null
+if [ $? -ne 0 ]; then
+    echo "getfattr command missing"
+    rc=255
+fi
+which setfattr 2>/dev/null
+if [ $? -ne 0 ]; then
+    echo "setfattr command missing"
+    rc=255
+fi
+if [ $rc -ne 0 ]; then
+    exit $rc
+fi
+
 touch f1
 attrs=`getfattr -d f1 | grep -v '^#'`
 if [ -n "$attrs" ]

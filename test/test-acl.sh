@@ -6,10 +6,26 @@
 # Return vals: 2 - Unable to run ACL commands, assertion failure
 #              1 - Invalid return value
 #              0 - Pass
+#              255 - acl programs unavailable, skip
 
 # NOTE: these test exclusively test setfacl -m
 
 set -u
+
+rc=0
+which getfacl 2>/dev/null
+if [ $? -ne 0 ]; then
+    echo "getfacl command missing"
+    rc=255
+fi
+which setfacl 2>/dev/null
+if [ $? -ne 0 ]; then
+    echo "setfacl command missing"
+    rc=255
+fi
+if [ $rc -ne 0 ]; then
+    exit $rc
+fi
 
 check_owner () {
     local file="$1"

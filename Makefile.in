@@ -76,6 +76,9 @@ TABLES=table_templates/pseudo_tables.c table_templates/pseudo_tables.h
 all: $(LIBPSEUDO) $(PSEUDO) $(PSEUDODB) $(PSEUDOLOG) $(PSEUDO_PROFILE)
 
 test: all $(TESTS) | $(BIN) $(LIB)
+	./run_tests.sh
+
+test-verbose: all $(TESTS) | $(BIN) $(LIB)
 	./run_tests.sh -v
 
 test/test-%: test/test-%.c
