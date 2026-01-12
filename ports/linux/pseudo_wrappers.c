@@ -92,6 +92,19 @@ syscall(long number, ...) {
 	}
 #endif
 
+#ifdef SYS_openat2
+	/* concerns exist about trying to parse arguments because syscall(2)
+	 * specifies strange ABI behaviors. If we can get better clarity on
+	 * that, it could make sense to redirect to wrap_openat2().
+	 * There is a CVE patch (CVE-2025-45582) to tar 1.34 in Centos Stream which
+	 * uses syscall to access openat2() and breaks builds if we don't redirect.
+	 */
+	if (number == SYS_openat2) {
+		errno = ENOSYS;
+		return -1;
+	}
+#endif
+
 	/* gcc magic to attempt to just pass these args to syscall. we have to
 	 * guess about the number of args; the docs discuss calling conventions
 	 * up to 7, so let's try that?
