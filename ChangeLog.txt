@@ -1,3 +1,7 @@
+This changelog is obsolete, it stopped being updated as of commit
+097ca3e245200c4a4333964af59a106c42ff3bca.  See the git log for up to
+date changes.
+
 2019-08-02:
 	* (seebs) Pass flags & O_NOFOLLOW, also use that to influence
 	  stat types. Note. &. Not |.
