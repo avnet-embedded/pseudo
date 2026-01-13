@@ -84,26 +84,31 @@ syscall(long number, ...) {
         }
 
 #ifdef SYS_openat2
-	/* concerns exist about trying to parse arguments because syscall(2)
-	 * specifies strange ABI behaviors. If we can get better clarity on
-	 * that, it could make sense to redirect to wrap_openat2().
-	 * There is a CVE patch (CVE-2025-45582) to tar 1.34 in Centos Stream which
+	/* There is a CVE patch (CVE-2025-45582) to tar 1.34 in Centos Stream which
 	 * uses syscall to access openat2() and breaks builds if we don't redirect.
 	 */
 	if (number == SYS_openat2) {
-		errno = ENOSYS;
-		return -1;
+		va_start(ap, number);
+		int dirfd = va_arg(ap, int);
+		const char * path = va_arg(ap, const char *);
+		void *how = va_arg(ap, void *);
+		size_t size = va_arg(ap, size_t);
+
+		return wrap_openat2(dirfd, path, how, size);
 	}
 #endif
 
 #ifdef SYS_renameat2
-	/* concerns exist about trying to parse arguments because syscall(2)
-	 * specifies strange ABI behaviors. If we can get better clarity on
-	 * that, it could make sense to redirect to wrap_renameat2().
-	 */
+        /* Call out wrapper, expanding the variable arguments first */
 	if (number == SYS_renameat2) {
-		errno = ENOSYS;
-		return -1;
+		va_start(ap, number);
+		int olddirfd = va_arg(ap, int);
+		const char * oldpath = va_arg(ap, const char *);
+		int newdirfd = va_arg(ap, int);
+		const char * newpath = va_arg(ap, const char *);
+		unsigned int flags = va_arg(ap, unsigned int);
+
+		return wrap_renameat2(olddirfd, oldpath, newdirfd, newpath, flags);
 	}
 #endif
 
