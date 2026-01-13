@@ -1,1 +1,1 @@
-int statx(int dirfd, const char *path, int flags, unsigned int mask, struct statx *statxbuf);
+int statx(int dirfd, const char *path, int flags, unsigned int mask, struct statx *statxbuf); /* efault=path */

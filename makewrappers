@@ -245,6 +245,8 @@ class Function:
         self.async_skip = None
         # used for the copyright date when creating stub functions
         self.date = datetime.date.today().year
+        # Used to define pointers that should EFAULT if null
+        self.efault = None
     
         function, comments = line.split(';')
         comment = re.search(r'/\* *(.*) *\*/', comments)
@@ -392,6 +394,14 @@ class Function:
                     "asm(\"\" : \"+r\"(%s));"
                     "if (%s && !*%s && (flags & AT_EMPTY_PATH))\n"
                     "\t\t\tflags |= AT_SYMLINK_NOFOLLOW;" % (path, path, path))
+            if self.efault and path in self.efault.split('|'):
+                fix_paths.append(
+                    # Emulate EFAULT when path is null
+                    "if (%s == NULL) {\n"
+                    "\t\t\terrno = EFAULT;\n"
+                    "\t\t\trc = -1;\n"
+                    "\t\t\t%s\n"
+                    "\t\t}\n" % (path, self.rc_return()))
             fix_paths.append(
                 "%s = pseudo_root_path(__func__, __LINE__, %s%s, %s, %s);" %
                 (path, prefix, self.dirfd, path, self.flags))
