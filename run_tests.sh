@@ -46,6 +46,10 @@ do
     if [ "${opt_verbose}" = "-v" ]; then
         echo
         cat ${tmplog}
+        if [ $rc -ne 0 -a $rc -ne 255 ]; then
+            # Include the contents of the pseudo.log before we delete it
+            cat var/pseudo/pseudo.log
+        fi
     fi
     if [ "$rc" -eq "0" ]; then
         let num_passed_tests++
