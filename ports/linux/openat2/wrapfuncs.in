@@ -1,0 +1,1 @@
+int openat2(int dirfd, const char *path, struct open_how *how, size_t size);

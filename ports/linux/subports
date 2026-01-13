@@ -70,3 +70,5 @@ else
 fi
 rm -f dummy.c dummy.o
 
+# For openat2, similar to statx, we need to be able to build on systems without that support.
+echo "linux/openat2"
