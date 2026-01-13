@@ -209,6 +209,7 @@ typedata = {
   'ssize_t': { 'format': '%ld', 'value': '(long) rc' },
   'struct group *': { 'format': '%p', 'value': '(void *) rc' },
   'struct passwd *': { 'format': '%p', 'value': '(void *) rc' },
+  'struct open_how *': { 'format': '%p', 'value': '(void *) rc' },
   'uid_t': { 'format': '%ld', 'value': ' (long) rc' },
   'void *': { 'format': '%p', 'value': 'rc' },
   'void': { 'format': 'void%s', 'value': '""' },
