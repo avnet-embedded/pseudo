@@ -1,12 +1,12 @@
-ssize_t getxattr(const char *path, const char *name, void *value, size_t size); /* flags=0, version="GLIBC_2.3", version-aarch64="GLIBC_2.17" */
-ssize_t lgetxattr(const char *path, const char *name, void *value, size_t size); /* flags=AT_SYMLINK_NOFOLLOW, version="GLIBC_2.3", version-aarch64="GLIBC_2.17" */
+ssize_t getxattr(const char *path, const char *name, void *value, size_t size); /* flags=0, version="GLIBC_2.3", version-aarch64="GLIBC_2.17", efault=path */
+ssize_t lgetxattr(const char *path, const char *name, void *value, size_t size); /* flags=AT_SYMLINK_NOFOLLOW, version="GLIBC_2.3", version-aarch64="GLIBC_2.17", efault=path */
 ssize_t fgetxattr(int filedes, const char *name, void *value, size_t size); /* version="GLIBC_2.3", version-aarch64="GLIBC_2.17" */
-int setxattr(const char *path, const char *name, const void *value, size_t size, int xflags); /* flags=0, version="GLIBC_2.3", version-aarch64="GLIBC_2.17" */
-int lsetxattr(const char *path, const char *name, const void *value, size_t size, int xflags); /* flags=AT_SYMLINK_NOFOLLOW, version="GLIBC_2.3", version-aarch64="GLIBC_2.17" */
+int setxattr(const char *path, const char *name, const void *value, size_t size, int xflags); /* flags=0, version="GLIBC_2.3", version-aarch64="GLIBC_2.17", efault=path */
+int lsetxattr(const char *path, const char *name, const void *value, size_t size, int xflags); /* flags=AT_SYMLINK_NOFOLLOW, version="GLIBC_2.3", version-aarch64="GLIBC_2.17", efault=path */
 int fsetxattr(int filedes, const char *name, const void *value, size_t size, int xflags); /* version="GLIBC_2.3", version-aarch64="GLIBC_2.17" */
-ssize_t listxattr(const char *path, char *list, size_t size); /* flags=0, version="GLIBC_2.3", version-aarch64="GLIBC_2.17" */
-ssize_t llistxattr(const char *path, char *list, size_t size); /* flags=AT_SYMLINK_NOFOLLOW, version="GLIBC_2.3", version-aarch64="GLIBC_2.17" */
+ssize_t listxattr(const char *path, char *list, size_t size); /* flags=0, version="GLIBC_2.3", version-aarch64="GLIBC_2.17", efault=path */
+ssize_t llistxattr(const char *path, char *list, size_t size); /* flags=AT_SYMLINK_NOFOLLOW, version="GLIBC_2.3", version-aarch64="GLIBC_2.17", efault=path */
 ssize_t flistxattr(int filedes, char *list, size_t size); /* version="GLIBC_2.3", version-aarch64="GLIBC_2.17" */
-int removexattr(const char *path, const char *name); /* flags=0, version="GLIBC_2.3", version-aarch64="GLIBC_2.17" */
-int lremovexattr(const char *path, const char *name); /* flags=AT_SYMLINK_NOFOLLOW, version="GLIBC_2.3", version-aarch64="GLIBC_2.17" */
+int removexattr(const char *path, const char *name); /* flags=0, version="GLIBC_2.3", version-aarch64="GLIBC_2.17", efault=path */
+int lremovexattr(const char *path, const char *name); /* flags=AT_SYMLINK_NOFOLLOW, version="GLIBC_2.3", version-aarch64="GLIBC_2.17", efault=path */
 int fremovexattr(int filedes, const char *name); /* version="GLIBC_2.3", version-aarch64="GLIBC_2.17" */

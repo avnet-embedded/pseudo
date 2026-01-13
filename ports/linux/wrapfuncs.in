@@ -1,17 +1,17 @@
 int open(const char *path, int flags, ...{mode_t mode}); /* flags=((flags&O_NOFOLLOW)||((flags&(O_CREAT|O_EXCL))==(O_CREAT|O_EXCL))), noignore_path=1 */
 char *get_current_dir_name(void);
-int __xstat(int ver, const char *path, struct stat *buf);
-int __lxstat(int ver, const char *path, struct stat *buf); /* flags=AT_SYMLINK_NOFOLLOW */
+int __xstat(int ver, const char *path, struct stat *buf); /* efault=path */
+int __lxstat(int ver, const char *path, struct stat *buf); /* flags=AT_SYMLINK_NOFOLLOW, efault=path */
 int __fxstat(int ver, int fd, struct stat *buf);
 int lchmod(const char *path, mode_t mode); /* flags=AT_SYMLINK_NOFOLLOW */
 int lchown(const char *path, uid_t owner, gid_t group); /* flags=AT_SYMLINK_NOFOLLOW */
-int __fxstatat(int ver, int dirfd, const char *path, struct stat *buf, int flags);
+int __fxstatat(int ver, int dirfd, const char *path, struct stat *buf, int flags); /* efault=path */
 int openat(int dirfd, const char *path, int flags, ...{mode_t mode}); /* flags=((flags&O_NOFOLLOW)||((flags&(O_CREAT|O_EXCL))==(O_CREAT|O_EXCL))), noignore_path=1 */
 int __openat_2(int dirfd, const char *path, int flags); /* flags=((flags&O_NOFOLLOW)||((flags&(O_CREAT|O_EXCL))==(O_CREAT|O_EXCL))), noignore_path=1 */
 int mknod(const char *path, mode_t mode, dev_t dev); /* real_func=pseudo_mknod */
 int mknodat(int dirfd, const char *path, mode_t mode, dev_t dev); /* real_func=pseudo_mknodat */
-int __xmknod(int ver, const char *path, mode_t mode, dev_t *dev); /* flags=AT_SYMLINK_NOFOLLOW */
-int __xmknodat(int ver, int dirfd, const char *path, mode_t mode, dev_t *dev); /* flags=AT_SYMLINK_NOFOLLOW */
+int __xmknod(int ver, const char *path, mode_t mode, dev_t *dev); /* flags=AT_SYMLINK_NOFOLLOW, efault=path */
+int __xmknodat(int ver, int dirfd, const char *path, mode_t mode, dev_t *dev); /* flags=AT_SYMLINK_NOFOLLOW, efault=path */
 int fcntl(int fd, int cmd, ...{struct flock *lock});  /* noignore_path=1 */
 int fcntl64(int fd, int cmd, ...{struct flock *lock});  /* noignore_path=1 */
 # just so we know the inums of symlinks
@@ -24,15 +24,15 @@ int creat64(const char *path, mode_t mode);
 int stat(const char *path, struct stat *buf); /* real_func=pseudo_stat */
 int lstat(const char *path, struct stat *buf); /* real_func=pseudo_lstat, flags=AT_SYMLINK_NOFOLLOW */
 int fstat(int fd, struct stat *buf); /* real_func=pseudo_fstat */
-int fstatat(int dirfd, const char *path, struct stat *buf, int flags);
+int fstatat(int dirfd, const char *path, struct stat *buf, int flags); /* efault=path */
 int stat64(const char *path, struct stat64 *buf); /* real_func=pseudo_stat64 */
 int lstat64(const char *path, struct stat64 *buf); /* real_func=pseudo_lstat64, flags=AT_SYMLINK_NOFOLLOW */
 int fstat64(int fd, struct stat64 *buf); /* real_func=pseudo_fstat64 */
-int fstatat64(int dirfd, const char *path, struct stat64 *buf, int flags);
-int __xstat64(int ver, const char *path, struct stat64 *buf);
-int __lxstat64(int ver, const char *path, struct stat64 *buf); /* flags=AT_SYMLINK_NOFOLLOW */
+int fstatat64(int dirfd, const char *path, struct stat64 *buf, int flags); /* efault=path */
+int __xstat64(int ver, const char *path, struct stat64 *buf); /* efault=path */
+int __lxstat64(int ver, const char *path, struct stat64 *buf); /* flags=AT_SYMLINK_NOFOLLOW, efault=path */
 int __fxstat64(int ver, int fd, struct stat64 *buf);
-int __fxstatat64(int ver, int dirfd, const char *path, struct stat64 *buf, int flags);
+int __fxstatat64(int ver, int dirfd, const char *path, struct stat64 *buf, int flags); /* efault=path */
 FILE *fopen64(const char *path, const char *mode); /* noignore_path=1 */
 int nftw64(const char *path, int (*fn)(const char *, const struct stat64 *, int, struct FTW *), int nopenfd, int flag); /* noignore_path=1 */
 FILE *freopen64(const char *path, const char *mode, FILE *stream);  /* noignore_path=1 */
@@ -61,7 +61,7 @@ int getpwent_r(struct passwd *pwbuf, char *buf, size_t buflen, struct passwd **p
 int getgrent_r(struct group *gbuf, char *buf, size_t buflen, struct group **gbufp);
 int capset(cap_user_header_t hdrp, const cap_user_data_t datap); /* real_func=pseudo_capset */
 long syscall(long nr, ...); /* hand_wrapped=1 */
-int renameat2(int olddirfd, const char *oldpath, int newdirfd, const char *newpath, unsigned int flags); /* flags=AT_SYMLINK_NOFOLLOW */
+int renameat2(int olddirfd, const char *oldpath, int newdirfd, const char *newpath, unsigned int flags); /* flags=AT_SYMLINK_NOFOLLOW, efault=oldpath|newpath */
 int prctl(int option, ...); /* hand_wrapped=1 */
 int close_range(unsigned int lowfd, unsigned int maxfd, int flags);
 void closefrom(int fd);
