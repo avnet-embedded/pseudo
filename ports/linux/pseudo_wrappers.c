@@ -65,19 +65,6 @@ syscall(long number, ...) {
 		return rc;
 	}
 
-#ifdef SYS_renameat2
-	/* concerns exist about trying to parse arguments because syscall(2)
-	 * specifies strange ABI behaviors. If we can get better clarity on
-	 * that, it could make sense to redirect to wrap_renameat2().
-	 */
-	if (number == SYS_renameat2) {
-		errno = ENOSYS;
-		return -1;
-	}
-#else
-	(void) number;
-#endif
-
 #ifdef SYS_seccomp
 	/* pseudo and seccomp are incompatible as pseudo uses different syscalls
 	 * so pretend to enable seccomp but really do nothing */
@@ -92,6 +79,10 @@ syscall(long number, ...) {
 	}
 #endif
 
+        if (pseudo_disabled) {
+                goto call_syscall;
+        }
+
 #ifdef SYS_openat2
 	/* concerns exist about trying to parse arguments because syscall(2)
 	 * specifies strange ABI behaviors. If we can get better clarity on
@@ -105,6 +96,18 @@ syscall(long number, ...) {
 	}
 #endif
 
+#ifdef SYS_renameat2
+	/* concerns exist about trying to parse arguments because syscall(2)
+	 * specifies strange ABI behaviors. If we can get better clarity on
+	 * that, it could make sense to redirect to wrap_renameat2().
+	 */
+	if (number == SYS_renameat2) {
+		errno = ENOSYS;
+		return -1;
+	}
+#endif
+
+call_syscall:
 	/* gcc magic to attempt to just pass these args to syscall. we have to
 	 * guess about the number of args; the docs discuss calling conventions
 	 * up to 7, so let's try that?
