@@ -41,6 +41,8 @@ char* get_absolute_path(const char* fpath) {
 }
 
 static int callback(const char* fpath, const struct NFTW_STAT_STRUCT *sb, int typeflag, struct FTW *ftwbuf){
+    (void) ftwbuf;
+
     if (print_filename) {
         char* filepath = get_absolute_path(fpath);
         printf("%s\n", filepath);
