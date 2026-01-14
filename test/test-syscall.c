@@ -11,7 +11,7 @@
 #include <string.h>
 #include <errno.h>
 
-int main(int argc, char *argv[]) {
+int main() {
     long rc = 0;
 
 #ifdef SYS_renameat2
