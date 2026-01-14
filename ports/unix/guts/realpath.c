@@ -23,14 +23,14 @@
 		return NULL;
 	}
 
-		len = strlen(rname);
-		char *ep = rname + len - 1;
-		while (ep > rname && *ep == '/') {
-			--len;
-			*(ep--) = '\0';
-		}
+	len = strlen(rname);
+	char *ep = rname + len - 1;
+	while (ep > rname && *ep == '/') {
+		--len;
+		*(ep--) = '\0';
+	}
 
-		if (len >= pseudo_sys_path_max()) {
+	if (len >= pseudo_sys_path_max()) {
 		errno = ENAMETOOLONG;
 		return NULL;
 	}
