@@ -71,6 +71,8 @@ ${maybe_async_skip}
 		}
 	}
 	${variadic_end}
+quick_exit:
+	__attribute__((unused));
 	save_errno = errno;
 	pseudo_droplock();
 	sigprocmask(SIG_SETMASK, &saved, NULL);

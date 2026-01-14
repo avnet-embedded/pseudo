@@ -399,9 +399,9 @@ class Function:
                     # Emulate EFAULT when path is null
                     "if (%s == NULL) {\n"
                     "\t\t\terrno = EFAULT;\n"
-                    "\t\t\trc = -1;\n"
-                    "\t\t\t%s\n"
-                    "\t\t}\n" % (path, self.rc_return()))
+                    "\t\t\t%s -1;\n"
+                    "\t\t\tgoto quick_exit;\n"
+                    "\t\t}\n" % (path, self.rc_assign()))
             fix_paths.append(
                 "%s = pseudo_root_path(__func__, __LINE__, %s%s, %s, %s);" %
                 (path, prefix, self.dirfd, path, self.flags))
