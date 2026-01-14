@@ -56,17 +56,17 @@ use_maybe_rpath=true
 
 for arg
 do
-    case $arg in
+    case "$arg" in
     --disable-*)
         arg="--enable-${arg%--disable-}=no"
 	;;
     esac
-    case $arg in
+    case "$arg" in
     --)    shift; break ;;
     --prefix=*)
         opt_prefix=${arg#--prefix=}
 	if [ -d "$opt_prefix" ]; then
-		maybe_prefix=$(cd "$opt_prefix"; pwd)
+		maybe_prefix=$(cd "$opt_prefix" && pwd)
 	else
 		maybe_prefix=$opt_prefix
 	fi
@@ -169,7 +169,7 @@ do
     esac
 done
 
-case $opt_arch in
+case "$opt_arch" in
 '' | x86 | arm )
     ;;
 *)    echo >&2 "Untested arch $opt_arch."
@@ -178,7 +178,7 @@ esac
 
 if [ -z "$opt_bits" ]; then
     printf >&2 "Bit width unspecified;"
-    case $(file -L /bin/sh 2>/dev/null) in
+    case "$(file -L /bin/sh 2>/dev/null)" in
     *64-bit*)	opt_bits=64;;
     *32-bit*)	opt_bits=32;;
     esac
@@ -241,6 +241,10 @@ read t1 t2 SQLITE3_VERSION << EOF
   `grep "#define SQLITE_VERSION_NUMBER " ${opt_sqlite}/include/sqlite3.h`
 EOF
 
+if [ -z "${SQLITE3_VERSION}" ]; then
+    echo >&2 "Could not determine SQLite version from header."
+    exit 1
+fi
 echo "SQLite header for version ${SQLITE3_VERSION} found in ${opt_sqlite}."
 
 if [ "${SQLITE3_VERSION}" -lt "03006000" ]; then
@@ -292,7 +296,7 @@ fi
 
 if $opt_xattr || $opt_xattrdb; then
     if ! $xattr_runs; then
-        echo >&2 "WARNING: getfattr doesn't work, but xattr-related features requestd."
+        echo >&2 "WARNING: getfattr doesn't work, but xattr-related features requested."
     fi
 fi
 
@@ -327,6 +331,7 @@ fi
 touch port_deps.mk
 touch func_deps.mk
 
+rm -f Makefile
 sed -e '
   s,@PREFIX@,'"$opt_prefix"',g
   s,@EPOLL@,'"$EPOLL"',g
@@ -350,4 +355,4 @@ sed -e '
   s,@BITS@,'"$opt_bits"',g
 ' < Makefile.in > Makefile
 
-sed -i -e 's/\-[f]*pie//g' Makefile
+sed Makefile -e 's/\-[f]*pie//g' > Makefile.tmp && mv Makefile.tmp Makefile
