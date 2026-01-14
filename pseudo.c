@@ -373,8 +373,11 @@ main(int argc, char *argv[]) {
 			while (*path) {
 				struct stat buf;
 				int len = strcspn(path, ":");
-				snprintf(fullpath, pseudo_path_max(), "%.*s/%s",
-					len, path, argv[0]);
+				if ( snprintf(fullpath, pseudo_path_max(), "%.*s/%s",
+					len, path, argv[0]) > (int) pseudo_path_max()) {
+					pseudo_diag("pseudo: path too long.\n");
+					exit(EXIT_FAILURE);
+				}
 				path += len;
 				if (*path == ':')
 					++path;
@@ -394,27 +397,33 @@ main(int argc, char *argv[]) {
 		pseudo_setupenv();
 
 		rc = fork();
-		if (rc) {
-			waitpid(rc, &rc, 0);
-			/* try to hint that we don't think we still need
-			 * the server.
-			 */
-                        if (opt_S) {
-				pseudo_client_shutdown(1);
-                        }
-			if (WIFEXITED(rc)) {
-				return WEXITSTATUS(rc);
-			} else if (WIFSIGNALED(rc)) {
-				kill(getpid(), WTERMSIG(rc));
-				exit(1);
-			} else {
-				exit(1);
-			}
+		if (rc == -1) {
+			pseudo_diag("pseudo: fork failed: %s\n",
+				strerror(errno));
+			exit(EXIT_FAILURE);
 		} else {
-			rc = execv(fullpath, argv);
-			if (rc == -1) {
-				pseudo_diag("pseudo: can't run %s: %s\n",
-					argv[0], strerror(errno));
+			if (rc) {
+				waitpid(rc, &rc, 0);
+				/* try to hint that we don't think we still need
+				 * the server.
+				 */
+				if (opt_S) {
+					pseudo_client_shutdown(1);
+				}
+				if (WIFEXITED(rc)) {
+					return WEXITSTATUS(rc);
+				} else if (WIFSIGNALED(rc)) {
+					kill(getpid(), WTERMSIG(rc));
+					exit(1);
+				} else {
+					exit(1);
+				}
+			} else {
+				rc = execv(fullpath, argv);
+				if (rc == -1) {
+					pseudo_diag("pseudo: can't run %s: %s\n",
+						argv[0], strerror(errno));
+				}
 			}
 			exit(EXIT_FAILURE);
 		}
@@ -482,15 +491,19 @@ pseudo_op(pseudo_msg_t *msg, const char *program, const char *tag, char **respon
 			/* for rename, the path name would be null-terminated,
 			 * but for *xattr, we don't want the null. */
 			oldpathlen = msg->pathlen - (oldpath - msg->path) - 1;
-			pseudo_debug(PDBGF_OP | PDBGF_FILE | PDBGF_XATTR, "%s: path '%s', oldpath '%s' [%d/%d]\n",
-				pseudo_op_name(msg->op), msg->path, oldpath, (int) oldpathlen, (int) msg->pathlen);
+
 			/* For a rename op, we want to strip any trailing
 			 * slashes. For xattr, "oldpath" is the raw data
 			 * to be stored. */
 			if (oldpathlen > 0 && msg->op == OP_RENAME) {
+				pseudo_debug(PDBGF_OP | PDBGF_FILE | PDBGF_XATTR, "%s: path '%s', oldpath '%s' [%d/%d]\n",
+					pseudo_op_name(msg->op), msg->path, oldpath, (int) oldpathlen, (int) msg->pathlen);
 				if (oldpath[oldpathlen - 1] == '/') {
 					oldpath[--oldpathlen] = '\0';
 				}
+			} else {
+				pseudo_debug(PDBGF_OP | PDBGF_FILE | PDBGF_XATTR, "%s: path '%s', xattr data len %d [%d]\n",
+					pseudo_op_name(msg->op), msg->path, (int) oldpathlen, (int) msg->pathlen);
 			}
 			/* if we got an oldpath, but a 0-length initial
 			 * path, we don't want to act as though we had

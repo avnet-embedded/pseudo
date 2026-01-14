@@ -2165,6 +2165,10 @@ pdb_update_inode(pseudo_msg_t *msg) {
 
 	if (!oldmsg) {
 		oldmsg = malloc(sizeof(*msg) + pseudo_path_max());
+		if (!oldmsg) {
+			pseudo_diag("%s: out of memory\n", __func__);
+			return 1;
+		}
 	}
 
 	char *sql = "UPDATE files "
@@ -2516,6 +2520,12 @@ pdb_get_xattr(pseudo_msg_t *msg, char **value, size_t *len) {
 			 * arbitrary bytes.
 			 */
 			*value = malloc(length);
+			if (!*value) {
+				pseudo_diag("%s: out of memory\n", __func__);
+				sqlite3_reset(select);
+				sqlite3_clear_bindings(select);
+				return 1;
+			}
 			memcpy(*value, response, length);
 			*len = length;
 			rc = 0;

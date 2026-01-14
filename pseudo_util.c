@@ -340,7 +340,10 @@ without_libpseudo(char *list) {
 		return list;
 	}
 	list = strdup(list);
-	while (!(*real_regexec)(&libpseudo_regex, list, 1, pmatch, 0)) {
+	if (!list) {
+		pseudo_diag("Couldn't allocate memory to remove libpseudo from environment.\n");
+	}
+	while (list && !(*real_regexec)(&libpseudo_regex, list, 1, pmatch, 0)) {
 		char *start = list + pmatch[0].rm_so;
 		char *end = list + pmatch[0].rm_eo;
 		/* don't copy over the space or = */
@@ -895,6 +898,10 @@ pseudo_fix_path(const char *base, const char *path, size_t rootlen, size_t basel
 	}
 	if (!pathbufs[pathbuf]) {
 		pathbufs[pathbuf] = malloc(newpathlen);
+		if (!pathbufs[pathbuf]) {
+			pseudo_diag("allocation failed seeking memory for path (%s).\n", path);
+			return 0;
+		}
 	}
 	newpath = pathbufs[pathbuf];
 	pathbuf = (pathbuf + 1) % PATHBUFS;
@@ -1047,19 +1054,21 @@ pseudo_setupenv() {
 		char *newenv = malloc(len);
 		if (!newenv) {
 			pseudo_diag("fatal: can't allocate new %s variable.\n", PRELINK_PATH);
+		} else {
+		    snprintf(newenv, len, "%s:%s64", libdir_path, libdir_path);
+		    SETENV(PRELINK_PATH, newenv, 1);
+		    free(newenv);
 		}
-		snprintf(newenv, len, "%s:%s64", libdir_path, libdir_path);
-		SETENV(PRELINK_PATH, newenv, 1);
-		free(newenv);
 	} else if (!strstr(ld_library_path, libdir_path)) {
 		size_t len = strlen(ld_library_path) + 1 + strlen(libdir_path) + 1 + (strlen(libdir_path) + 2) + 1;
 		char *newenv = malloc(len);
 		if (!newenv) {
 			pseudo_diag("fatal: can't allocate new %s variable.\n", PRELINK_PATH);
+		} else {
+		    snprintf(newenv, len, "%s:%s:%s64", ld_library_path, libdir_path, libdir_path);
+		    SETENV(PRELINK_PATH, newenv, 1);
+		    free(newenv);
 		}
-		snprintf(newenv, len, "%s:%s:%s64", ld_library_path, libdir_path, libdir_path);
-		SETENV(PRELINK_PATH, newenv, 1);
-		free(newenv);
 	} else {
 		/* nothing to do, ld_library_path exists and contains
 		 * our preferred path */
@@ -1070,16 +1079,18 @@ pseudo_setupenv() {
 		ld_preload = with_libpseudo(ld_preload, libdir_path);
 		if (!ld_preload) {
 			pseudo_diag("fatal: can't allocate new %s variable.\n", PRELINK_LIBRARIES);
+		} else {
+		    SETENV(PRELINK_LIBRARIES, ld_preload, 1);
+		    free(ld_preload);
 		}
-		SETENV(PRELINK_LIBRARIES, ld_preload, 1);
-		free(ld_preload);
 	} else {
 		ld_preload = with_libpseudo("", libdir_path);
 		if (!ld_preload) {
 			pseudo_diag("fatal: can't allocate new %s variable.\n", PRELINK_LIBRARIES);
+		} else {
+		    SETENV(PRELINK_LIBRARIES, ld_preload, 1);
+		    free(ld_preload);
 		}
-		SETENV(PRELINK_LIBRARIES, ld_preload, 1);
-		free(ld_preload);
 	}
 
 	/* we kept libdir path until now because with_libpseudo might
@@ -1149,17 +1160,19 @@ pseudo_setupenvp(char * const *envp) {
 		char *newenv = malloc(len);
 		if (!newenv) {
 			pseudo_diag("fatal: can't allocate new %s variable.\n", PRELINK_PATH);
+		} else {
+		    snprintf(newenv, len, PRELINK_PATH "=%s:%s64", libdir_path, libdir_path);
+		    new_envp[j++] = newenv;
 		}
-		snprintf(newenv, len, PRELINK_PATH "=%s:%s64", libdir_path, libdir_path);
-		new_envp[j++] = newenv;
 	} else if (!strstr(ld_library_path, libdir_path)) {
 		size_t len = strlen(ld_library_path) + 1 + strlen(libdir_path) + 1 + (strlen(libdir_path) + 2) + 1;
 		char *newenv = malloc(len);
 		if (!newenv) {
 			pseudo_diag("fatal: can't allocate new %s variable.\n", PRELINK_PATH);
+		} else {
+		    snprintf(newenv, len, "%s:%s:%s64", ld_library_path, libdir_path, libdir_path);
+		    new_envp[j++] = newenv;
 		}
-		snprintf(newenv, len, "%s:%s:%s64", ld_library_path, libdir_path, libdir_path);
-		new_envp[j++] = newenv;
 	} else {
 		/* keep old value */
 		new_envp[j++] = ld_library_path;
@@ -1169,15 +1182,22 @@ pseudo_setupenvp(char * const *envp) {
 		ld_preload = with_libpseudo(ld_preload, libdir_path);
 		if (!ld_preload) {
 			pseudo_diag("fatal: can't allocate new %s variable.\n", PRELINK_LIBRARIES);
-		}
-		new_envp[j++] = ld_preload;
+		} else
+			new_envp[j++] = ld_preload;
 	} else {
 		ld_preload = with_libpseudo("", libdir_path);
-		size_t len = strlen(PRELINK_LIBRARIES "=") + strlen(ld_preload) + 1;
-		char *newenv = malloc(len);
-		snprintf(newenv, len, PRELINK_LIBRARIES "=%s", ld_preload);
-		new_envp[j++] = newenv;
-		free(ld_preload);
+		if (!ld_preload) {
+			pseudo_diag("fatal: can't allocate new %s variable.\n", PRELINK_LIBRARIES);
+		} else {
+			size_t len = strlen(PRELINK_LIBRARIES "=") + strlen(ld_preload) + 1;
+			char *newenv = malloc(len);
+			if (!newenv) {
+				pseudo_diag("fatal: can't allocate new %s variable.\n", PRELINK_LIBRARIES);
+			}
+			snprintf(newenv, len, PRELINK_LIBRARIES "=%s", ld_preload);
+			new_envp[j++] = newenv;
+			free(ld_preload);
+		}
 	}
 
 	free(libdir_path);

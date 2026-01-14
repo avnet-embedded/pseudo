@@ -900,6 +900,10 @@ pseudo_client_path_set(int fd, const char *path, char ***patharray, int *len) {
 		pseudo_debug(PDBGF_CLIENT, "expanding fds from %d to %d\n",
 			*len, fd + 1);
 		(*patharray) = realloc((*patharray), (fd + 1) * sizeof(char *));
+		if (!*patharray) {
+			pseudo_diag("couldn't realloc fd path array to %ld entries\n", (fd + 1) * sizeof(char *));
+			exit(1);
+		}
 		for (i = *len; i < fd + 1; ++i)
 			(*patharray)[i] = 0;
 		*len = fd + 1;

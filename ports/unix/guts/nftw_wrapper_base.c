@@ -38,7 +38,8 @@ static pthread_mutex_t NFTW_MUTEX_NAME = PTHREAD_MUTEX_INITIALIZER;
 
 static void NFTW_APPEND_FN_NAME(struct NFTW_STORAGE_STRUCT_NAME *data_to_append){
     NFTW_STORAGE_ARRAY_NAME = realloc(NFTW_STORAGE_ARRAY_NAME, ++NFTW_STORAGE_ARRAY_SIZE * sizeof(*data_to_append));
-    memcpy(&NFTW_STORAGE_ARRAY_NAME[NFTW_STORAGE_ARRAY_SIZE - 1], data_to_append, sizeof(*data_to_append));
+    if (NFTW_STORAGE_ARRAY_NAME)
+        memcpy(&NFTW_STORAGE_ARRAY_NAME[NFTW_STORAGE_ARRAY_SIZE - 1], data_to_append, sizeof(*data_to_append));
 }
 
 int NFTW_FIND_FN_NAME(struct NFTW_STORAGE_STRUCT_NAME* target) {
@@ -46,7 +47,7 @@ int NFTW_FIND_FN_NAME(struct NFTW_STORAGE_STRUCT_NAME* target) {
 
     // return the last one, not the first
     for (ssize_t i = NFTW_STORAGE_ARRAY_SIZE - 1; i >= 0; --i){
-        if (NFTW_STORAGE_ARRAY_NAME[i].tid == tid){
+        if ((NFTW_STORAGE_ARRAY_NAME) && (NFTW_STORAGE_ARRAY_NAME[i].tid == tid)){
             // need to dereference it, as next time this array
             // may be realloc'd, making the original pointer
             // invalid
@@ -62,7 +63,7 @@ static void NFTW_DELETE_FN_NAME() {
     pthread_t tid = pthread_self();
 
     if (NFTW_STORAGE_ARRAY_SIZE == 1) {
-        if (NFTW_STORAGE_ARRAY_NAME[0].tid == tid) {
+        if ((NFTW_STORAGE_ARRAY_NAME) && (NFTW_STORAGE_ARRAY_NAME[0].tid == tid)) {
             free(NFTW_STORAGE_ARRAY_NAME);
             NFTW_STORAGE_ARRAY_NAME = NULL;
             --NFTW_STORAGE_ARRAY_SIZE;
@@ -73,7 +74,7 @@ static void NFTW_DELETE_FN_NAME() {
     }
 
     int found_idx = -1;
-    for (ssize_t i = NFTW_STORAGE_ARRAY_SIZE - 1; i >= 0; --i) {
+    for (ssize_t i = NFTW_STORAGE_ARRAY_SIZE - 1; (NFTW_STORAGE_ARRAY_NAME) && i >= 0; --i) {
         if (NFTW_STORAGE_ARRAY_NAME[i].tid == tid) {
             found_idx = i;
             break;
@@ -86,7 +87,7 @@ static void NFTW_DELETE_FN_NAME() {
     }
 
     // delete the item we just found
-    for (size_t i = found_idx + 1; i < NFTW_STORAGE_ARRAY_SIZE; ++i)
+    for (size_t i = found_idx + 1; (NFTW_STORAGE_ARRAY_NAME) && i < NFTW_STORAGE_ARRAY_SIZE; ++i)
         NFTW_STORAGE_ARRAY_NAME[i - 1] = NFTW_STORAGE_ARRAY_NAME[i];
 
     NFTW_STORAGE_ARRAY_NAME = realloc(NFTW_STORAGE_ARRAY_NAME, --NFTW_STORAGE_ARRAY_SIZE * sizeof(struct NFTW_STORAGE_STRUCT_NAME));

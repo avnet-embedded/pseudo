@@ -558,6 +558,12 @@ serve_client(int i) {
 				char *s;
 
 				response_path = malloc(8 * active_clients);
+				if (!response_path) {
+					pseudo_diag("out of memory allocating shutdown response\n");
+					exit(PSEUDO_EXIT_GENERAL);
+				} else {
+					memset(response_path, 0, 8 * active_clients);
+				}
 				in->type = PSEUDO_MSG_NAK;
 				in->fd = active_clients - 2;
 				s = response_path;
@@ -626,6 +632,10 @@ static void pseudo_server_loop_epoll(void)
 	};
 
 	clients = malloc(16 * sizeof(*clients));
+	if (!clients) {
+		pseudo_diag("out of memory allocating client table.\n");
+		exit(PSEUDO_EXIT_LISTEN_FD);
+	}
 
 	sigaction(SIGUSR2, &eat_usr2, NULL);
 
@@ -796,6 +806,10 @@ pseudo_server_loop(void) {
 	int hitmaxfiles;
 
 	clients = malloc(16 * sizeof(*clients));
+	if (!clients) {
+		pseudo_diag("out of memory allocating client table.\n");
+		exit(PSEUDO_EXIT_LISTEN_FD);
+	}
 
 	sigaction(SIGUSR2, &eat_usr2, NULL);
 
