@@ -16,6 +16,7 @@
 	(void) newdirfd;
 	(void) newpath;
 	(void) flags;
+	/* In order to implement this, we will need a way to emulate RENAME_EXCHANGE. */
 	/* for now, let's try just failing out hard, and hope things retry with a
 	 * different syscall.
 	 */
