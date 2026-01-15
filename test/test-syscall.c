@@ -67,17 +67,19 @@ int main() {
 
     int fd;
     fd = syscall(SYS_openat2, AT_FDCWD, ".", &how, sizeof(how));
+    printf("diag: openat2: %d (%s)\n", fd, strerror(errno));
     if (fd == -1) {
         if (errno != ENOSYS) {
             printf("openat2: fail: function implemented: %s\n", strerror(errno));
             rc++;
         }
-        else
-            printf("openat2: pass\n");
+        else {
+            printf("openat2: fail: %s", strerror(errno));
+            rc++;
+	}
     }
     else {
-        printf("openat2: fail: function implemented\n");
-        rc++;
+        printf("openat2: pass\n");
     }
 
     close(fd);
