@@ -69,6 +69,7 @@ syscall(long number, ...) {
 	/* pseudo and seccomp are incompatible as pseudo uses different syscalls
 	 * so pretend to enable seccomp but really do nothing */
 	if (number == SYS_seccomp) {
+		pseudo_debug(PDBGF_SYSCALL, "syscall, faking seccomp.\n");
 		unsigned long cmd;
 		va_start(ap, number);
 		cmd = va_arg(ap, unsigned long);
@@ -88,6 +89,8 @@ syscall(long number, ...) {
 	 * uses syscall to access openat2() and breaks builds if we don't redirect.
 	 */
 	if (number == SYS_openat2) {
+		pseudo_debug(PDBGF_SYSCALL, "syscall, faking openat2.\n");
+
 		va_start(ap, number);
 		int dirfd = va_arg(ap, int);
 		const char * path = va_arg(ap, const char *);
@@ -101,6 +104,8 @@ syscall(long number, ...) {
 #ifdef SYS_renameat2
         /* Call out wrapper, expanding the variable arguments first */
 	if (number == SYS_renameat2) {
+		pseudo_debug(PDBGF_SYSCALL, "syscall, faking renameat2.\n");
+
 		va_start(ap, number);
 		int olddirfd = va_arg(ap, int);
 		const char * oldpath = va_arg(ap, const char *);
