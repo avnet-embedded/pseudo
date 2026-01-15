@@ -72,12 +72,13 @@ int main() {
             printf("openat2: fail: function implemented: %s\n", strerror(errno));
             rc++;
         }
-        else
-            printf("openat2: pass\n");
+        else {
+            printf("openat2: fail: %s", strerror(errno));
+            rc++;
+	}
     }
     else {
-        printf("openat2: fail: function implemented\n");
-        rc++;
+        printf("openat2: pass\n");
     }
 
     close(fd);
