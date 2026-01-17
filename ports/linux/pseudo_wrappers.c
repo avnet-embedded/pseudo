@@ -108,6 +108,14 @@ syscall(long number, ...) {
 #endif
 
 call_syscall:
+	/* On Debian 11 - gcc (Debian 10.2.1-6) this results in:
+	 *   error: a label can only be part of a statement and a declaration
+	 *   is not a statement
+	 *
+	 * adding a ; here resolves this
+	 */
+	;
+
 	/* gcc magic to attempt to just pass these args to syscall. we have to
 	 * guess about the number of args; the docs discuss calling conventions
 	 * up to 7, so let's try that?
