@@ -783,7 +783,7 @@ pdb_log_traits(pseudo_query_t *traits) {
 		pseudo_diag("%s: database error.\n", __func__);
 		return 1;
 	}
-	e = calloc(sizeof(*e), 1);
+	e = calloc(1, sizeof(*e));
 	if (!e) {
 		pseudo_diag("can't allocate space for log entry.");
 		return 1;
@@ -1376,7 +1376,7 @@ pdb_history_entry(log_history h) {
 		dberr(log_db, "statement failed");
 		return 0;
 	}
-	l = calloc(sizeof(log_entry), 1);
+	l = calloc(1, sizeof(log_entry));
 	if (!l) {
 		pseudo_diag("couldn't allocate log entry.\n");
 		return 0;
