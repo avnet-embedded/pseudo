@@ -96,6 +96,8 @@ syscall(long number, ...) {
 
 		return wrap_openat2(dirfd, path, how, size);
 	}
+#else
+#error SYS_openat2 not defined
 #endif
 
 #ifdef SYS_renameat2

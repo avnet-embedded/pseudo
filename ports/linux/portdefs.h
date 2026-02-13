@@ -53,3 +53,8 @@ GLIBC_COMPAT_SYMBOL(memcpy,2.0);
 #define _MKNOD_VER 1
 #endif
 #endif
+
+/* Debian 11 and Opensuse 15.5 need this */
+#ifndef SYS_openat2
+#define SYS_openat2 __NR_openat2
+#endif
