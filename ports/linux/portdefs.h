@@ -54,7 +54,15 @@ GLIBC_COMPAT_SYMBOL(memcpy,2.0);
 #endif
 #endif
 
-/* Debian 11 and Opensuse 15.5 need this */
+/* Ubuntu 20.04, Debian 11 and Opensuse 15.5 need this */
 #ifndef SYS_openat2
+
+/* On kernel <5.6, __NR_openat2 is not defined. Import the definition from
+ * https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=fddb5d430ad9fa91b49b1d34d0202ffe2fa0e179
+ */
+#ifndef __NR_openat2
+#define __NR_openat2 437
+#endif
+
 #define SYS_openat2 __NR_openat2
 #endif
