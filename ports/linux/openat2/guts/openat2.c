@@ -4,7 +4,7 @@
  *
  * SPDX-License-Identifier: LGPL-2.1-only
  *
- * int openat2(int dirfd, const char *path, struct open_how *how, size_t size)
+ * int openat2(int dirfd, const char *path, const struct open_how *how, size_t size)
  *	int rc = -1;
  */
 
