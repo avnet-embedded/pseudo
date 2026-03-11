@@ -2196,7 +2196,9 @@ pdb_update_inode(pseudo_msg_t *msg) {
 	found_existing = !pdb_find_file_path(oldmsg);
 	if (found_existing) {
 		/* we have an existing file entry */
-		pdb_copy_xattrs(oldmsg, msg);
+		if (oldmsg->dev != msg->dev || oldmsg->ino != msg->ino) {
+			pdb_copy_xattrs(oldmsg, msg);
+		}
 	}
 	sqlite3_bind_int(update, 1, msg->dev);
 	sqlite3_bind_int64(update, 2, signed_ino(msg->ino));

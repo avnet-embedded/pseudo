@@ -65,6 +65,18 @@ then
     exit 1
 fi
 
+mv f1 f2
+attrs=`getfattr -d -m - f2 | grep -v '^#'`
+expected=$'security.dummy="test_f2"\nuser.dummy="test_f1"'
+if [ "$attrs" != "$expected" ]
+then
+	#echo "Fail, unpexected getfattr result '$attrs'"
+	rm -f f1
+	rm -f f2
+	exit 1
+fi
+
 #echo "Passed."
 rm -f f1
+rm -f f2
 exit 0
