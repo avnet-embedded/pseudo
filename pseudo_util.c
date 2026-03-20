@@ -1141,6 +1141,14 @@ pseudo_setupenvp(char * const *envp) {
 		++env_count;
 	}
 
+	/* If LD_PRELOAD or LD_LIBRARY_PATH were not included in the existing
+	 * environment, we need to make space for them.
+	 */
+	if (!ld_preload)
+		env_count++;
+	if (!ld_library_path)
+		env_count++;
+
 	for (i = 0; pseudo_env[i].key; i++) {
 		size_pseudoenv++;
 	}
