@@ -1201,9 +1201,10 @@ pseudo_setupenvp(char * const *envp) {
 			char *newenv = malloc(len);
 			if (!newenv) {
 				pseudo_diag("fatal: can't allocate new %s variable.\n", PRELINK_LIBRARIES);
+			} else {
+				snprintf(newenv, len, PRELINK_LIBRARIES "=%s", ld_preload);
+				new_envp[j++] = newenv;
 			}
-			snprintf(newenv, len, PRELINK_LIBRARIES "=%s", ld_preload);
-			new_envp[j++] = newenv;
 			free(ld_preload);
 		}
 	}
@@ -1229,9 +1230,10 @@ pseudo_setupenvp(char * const *envp) {
 			char *newenv = malloc(len);
 			if (!newenv) {
 				pseudo_diag("fatal: can't allocate new variable.\n");
+			} else {
+				snprintf(newenv, len, "%s=%s", pseudo_env[i].key, pseudo_env[i].value);
+				new_envp[j++] = newenv;
 			}
-			snprintf(newenv, len, "%s=%s", pseudo_env[i].key, pseudo_env[i].value);
-			new_envp[j++] = newenv;
 		}
 	}
 	new_envp[j++] = NULL;
