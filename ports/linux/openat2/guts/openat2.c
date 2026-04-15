@@ -14,6 +14,7 @@
 	int save_errno;
 	sigset_t local_saved_sigmask;
 	struct open_how my_how;
+	char *pseudo_path;
 
 	/* Validate parameters */
 	if (!how || size < sizeof(struct open_how)) {
@@ -24,6 +25,8 @@
 		errno = E2BIG;
 		return -1;
 	}
+
+        pseudo_path = pseudo_root_path(__func__, __LINE__, dirfd, path, 0);
 
 	memcpy(&my_how, how, size);
 
@@ -69,16 +72,16 @@
 		save_errno = errno;
 #ifdef PSEUDO_NO_REAL_AT_FUNCTIONS
 		if (my_how.flags & O_NOFOLLOW) {
-			rc = real___lxstat64(_STAT_VER, path, &buf);
+			rc = real___lxstat64(_STAT_VER, pseudo_path, &buf);
 		} else {
-			rc = real___xstat64(_STAT_VER, path, &buf);
+			rc = real___xstat64(_STAT_VER, pseudo_path, &buf);
 		}
 #else
-		rc = real___fxstatat64(_STAT_VER, dirfd, path, &buf, (my_how.flags & O_NOFOLLOW) ? AT_SYMLINK_NOFOLLOW : 0);
+		rc = real___fxstatat64(_STAT_VER, dirfd, pseudo_path, &buf, (my_how.flags & O_NOFOLLOW) ? AT_SYMLINK_NOFOLLOW : 0);
 #endif
 		existed = (rc != -1);
 		if (!existed)
-			pseudo_debug(PDBGF_FILE, "openat2_creat: %s -> 0%lld\n", path, my_how.mode);
+			pseudo_debug(PDBGF_FILE, "openat2_creat: %s -> 0%lld\n", pseudo_path, my_how.mode);
 		errno = save_errno;
 	}
 
@@ -90,12 +93,12 @@
 		save_errno = errno;
 #ifdef PSEUDO_NO_REAL_AT_FUNCTIONS
 		if (my_how.flags & O_NOFOLLOW) {
-			rc = real___lxstat64(_STAT_VER, path, &buf);
+			rc = real___lxstat64(_STAT_VER, pseudo_path, &buf);
 		} else {
-			rc = real___xstat64(_STAT_VER, path, &buf);
+			rc = real___xstat64(_STAT_VER, pseudo_path, &buf);
 		}
 #else
-		rc = real___fxstatat64(_STAT_VER, dirfd, path, &buf, (my_how.flags & O_NOFOLLOW) ? AT_SYMLINK_NOFOLLOW : 0);
+		rc = real___fxstatat64(_STAT_VER, dirfd, pseudo_path, &buf, (my_how.flags & O_NOFOLLOW) ? AT_SYMLINK_NOFOLLOW : 0);
 #endif
 		if (rc != -1 && S_ISFIFO(buf.st_mode)) {
 			overly_magic_nonblocking = 1;
@@ -134,7 +137,7 @@
 		 */
 		if (pseudo_getlock()) {
 			pseudo_diag("PANIC: after opening a readonly/writeonly FIFO (path '%s', fd %d, errno %d, saved errno %d), could not regain lock. unrecoverable. sorry. bye.\n",
-				path, rc, errno, save_errno);
+				pseudo_path, rc, errno, save_errno);
 			abort();
 		}
 		errno = save_errno;
@@ -156,28 +159,28 @@
 #endif
 #ifdef PSEUDO_NO_REAL_AT_FUNCTIONS
 		if (my_how.flags & O_NOFOLLOW) {
-			stat_rc = real___lxstat64(_STAT_VER, path, &buf);
+			stat_rc = real___lxstat64(_STAT_VER, pseudo_path, &buf);
 		} else {
-			stat_rc = real___xstat64(_STAT_VER, path, &buf);
+			stat_rc = real___xstat64(_STAT_VER, pseudo_path, &buf);
 		}
 #else
-		stat_rc = real___fxstatat64(_STAT_VER, dirfd, path, &buf, (my_how.flags & O_NOFOLLOW) ? AT_SYMLINK_NOFOLLOW : 0);
+		stat_rc = real___fxstatat64(_STAT_VER, dirfd, pseudo_path, &buf, (my_how.flags & O_NOFOLLOW) ? AT_SYMLINK_NOFOLLOW : 0);
 #endif
 
 		pseudo_debug(PDBGF_FILE, "openat2(path %s), flags %lld, stat rc %d, stat mode %o\n",
-			path, my_how.flags, stat_rc, buf.st_mode);
+			pseudo_path, my_how.flags, stat_rc, buf.st_mode);
 		if (stat_rc != -1) {
 			buf.st_mode = PSEUDO_DB_MODE(buf.st_mode, my_how.mode);
 			if (!existed) {
 				real_fchmod(rc, PSEUDO_FS_MODE(my_how.mode, 0));
 				// file has no path, but has been created
-				pseudo_client_op(OP_CREAT, 0, -1, dirfd, path, &buf);
+				pseudo_client_op(OP_CREAT, 0, -1, dirfd, pseudo_path, &buf);
 			}
-				pseudo_client_op(OP_OPEN, PSEUDO_ACCESS(my_how.flags), rc, dirfd, path, &buf);
+				pseudo_client_op(OP_OPEN, PSEUDO_ACCESS(my_how.flags), rc, dirfd, pseudo_path, &buf);
 		} else {
 			pseudo_debug(PDBGF_FILE, "openat2 (fd %d, path %d/%s, flags %lld) succeeded, but stat failed (%s).\n",
-				rc, dirfd, path, my_how.flags, strerror(errno));
-			pseudo_client_op(OP_OPEN, PSEUDO_ACCESS(my_how.flags), rc, dirfd, path, 0);
+				rc, dirfd, pseudo_path, my_how.flags, strerror(errno));
+			pseudo_client_op(OP_OPEN, PSEUDO_ACCESS(my_how.flags), rc, dirfd, pseudo_path, 0);
 		}
 		errno = save_errno;
 	}

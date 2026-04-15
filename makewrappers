@@ -248,6 +248,8 @@ class Function:
         self.date = datetime.date.today().year
         # Used to define pointers that should EFAULT if null
         self.efault = None
+        # Used for functions which need to called with the original unconverted paths
+        self.preserve_paths = False
     
         function, comments = line.split(';')
         comment = re.search(r'/\* *(.*) *\*/', comments)
@@ -383,6 +385,11 @@ class Function:
         """present argument list for a function call"""
         return self.args.call()
 
+    def paths_decl(self):
+        if self.preserve_paths:
+            return "\n\t".join("char *" + path + "_int;" for path in self.paths_to_munge)
+        return ""
+
     def fix_paths(self):
         """create/allocate canonical paths"""
         fix_paths = []
@@ -390,6 +397,9 @@ class Function:
             prefix = path[:-4]
             if prefix not in self.specific_dirfds:
                 prefix = ''
+            pathvar = path
+            if self.preserve_paths:
+                pathvar = path + "_int"
             if self.dirfd != "AT_FDCWD" and "flags" in self.flags \
                     and "AT_SYMLINK_NOFOLLOW" in self.flags:
                 fix_paths.append(
@@ -409,7 +419,7 @@ class Function:
                     "\t\t}\n" % (path, self.rc_assign()))
             fix_paths.append(
                 "%s = pseudo_root_path(__func__, __LINE__, %s%s, %s, %s);" %
-                (path, prefix, self.dirfd, path, self.flags))
+                (pathvar, prefix, self.dirfd, path, self.flags))
         return "\n\t\t".join(fix_paths)
 
     def ignore_paths(self):
@@ -423,6 +433,9 @@ class Function:
             mainpath = "newpath"
         elif "path" in self.paths_to_munge:
             mainpath = "path"
+
+        if mainpath and self.preserve_paths:
+            mainpath += "_int"
 
         if mainpath:
             return "pseudo_client_ignore_path(%s)" % mainpath
