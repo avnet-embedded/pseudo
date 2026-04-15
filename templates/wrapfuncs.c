@@ -22,6 +22,7 @@ ${name}(${decl_args}) {
 	sigset_t saved;
 	${variadic_decl}
 	${rc_decl}
+	${paths_decl}
 	PROFILE_START;
 
 ${maybe_async_skip}
