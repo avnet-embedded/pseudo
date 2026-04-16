@@ -33,7 +33,6 @@ int utimes(const char *path, const struct timeval *times);
 FILE *fopen(const char *path, const char *mode); /* noignore_path=1 */
 int fclose(FILE *fp);  /* noignore_path=1 */
 FILE *freopen(const char *path, const char *mode, FILE *stream); /* noignore_path=1 */
-int chroot(const char *path); /* noignore_path=1 */
 int acct(const char *path);
 int chmod(const char *path, mode_t mode);
 int chown(const char *path, uid_t owner, gid_t group);
