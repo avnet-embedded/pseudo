@@ -4,11 +4,15 @@
 #
 
 opt_verbose=
+test_args=()
 
 usage()
 {
     echo >&2 "usage:"
-    echo >&2 "  run_tests [-v|--verbose]"
+    echo >&2 "  run_tests [-v|--verbose] [test ...]"
+    echo >&2 ""
+    echo >&2 "If no tests are specified, all tests are run."
+    echo >&2 "Tests can be specified as filenames (test-fstat.sh) or basenames (test-fstat)."
     exit 1
 }
 
@@ -19,8 +23,14 @@ do
         -v | --verbose)
                 opt_verbose=-v
                 ;;
-        *)
+        -h | --help)
                 usage
+                ;;
+        -*)
+                usage
+                ;;
+        *)
+                test_args+=("$arg")
                 ;;
         esac
 done
@@ -36,7 +46,23 @@ num_failed_tests=0
 
 tmplog="$(mktemp pseudo.log.XXXXXXXX)"
 
-for file in test/test*.sh
+if [ ${#test_args[@]} -gt 0 ]; then
+    test_files=()
+    for t in "${test_args[@]}"; do
+        # Strip directory prefix and ensure .sh suffix
+        t="${t##*/}"
+        t="${t%.sh}.sh"
+        if [ -f "test/$t" ]; then
+            test_files+=("test/$t")
+        else
+            echo >&2 "Warning: test/$t not found, skipping."
+        fi
+    done
+else
+    test_files=(test/test*.sh)
+fi
+
+for file in "${test_files[@]}"
 do
     filename=${file#test/}
     let num_tests++
