@@ -30,6 +30,21 @@
 		*(ep--) = '\0';
 	}
 
+	/* If in a chroot, strip the chroot prefix so the caller sees
+	 * a path relative to the chroot root.
+	 */
+	if (pseudo_chroot_len &&
+	    (size_t)len >= pseudo_chroot_len &&
+	    !memcmp(rname, pseudo_chroot, pseudo_chroot_len) &&
+	    (rname[pseudo_chroot_len] == '/' || rname[pseudo_chroot_len] == '\0')) {
+		rname += pseudo_chroot_len;
+		len -= pseudo_chroot_len;
+		if (len == 0) {
+			rname = "/";
+			len = 1;
+		}
+	}
+
 	if (len >= pseudo_sys_path_max()) {
 		errno = ENAMETOOLONG;
 		return NULL;
