@@ -729,7 +729,21 @@ pseudo_append_element(char *newpath, char *root, size_t allocated, char **pcurre
 			linkbuf[linklen] = '\0';
 			/* absolute symlink means go back to root */
 			if (*linkbuf == '/') {
+				size_t rootlen = root - newpath;
 				current = root;
+				/* If we're in a chroot (rootlen > 0) and the
+				 * symlink target starts with the chroot prefix,
+				 * strip it.  This happens when symlinkat expanded
+				 * an absolute target to include the chroot path
+				 * on disk; without stripping, we'd double-apply
+				 * the chroot prefix during resolution.
+				 */
+				if (rootlen > 0 && (size_t)linklen > rootlen &&
+				    !memcmp(linkbuf, newpath, rootlen) &&
+				    (linkbuf[rootlen] == '/' || linkbuf[rootlen] == '\0')) {
+					memmove(linkbuf, linkbuf + rootlen, linklen - rootlen + 1);
+					linklen -= rootlen;
+				}
 			} else {
 #ifdef PSEUDO_PORT_LINUX
 				if (is_proc) {
