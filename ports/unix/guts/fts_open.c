@@ -42,7 +42,8 @@
 		errno = ENOMEM;
 		rc = NULL;
 	} else {
-		rc = real_fts_open(path_argv, options, compar);
+		rpath_argv[args] = NULL;
+		rc = real_fts_open(rpath_argv, options, compar);
 	}
 	for (i = 0; i < args; ++i)
 		free(rpath_argv[i]);
