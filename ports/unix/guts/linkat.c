@@ -35,7 +35,7 @@
 	}
 #endif
 	oldpath = oldname;
-	if (pseudo_chroot_len && strncmp(oldpath, pseudo_chroot, pseudo_chroot_len) &&
+	if (pseudo_chroot_len && !strncmp(oldpath, pseudo_chroot, pseudo_chroot_len) &&
 		oldpath[pseudo_chroot_len] == '/') {
 		oldpath += pseudo_chroot_len;
 	}
