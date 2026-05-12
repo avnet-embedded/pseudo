@@ -113,14 +113,32 @@
 				oldbuf.st_ino = newbuf.st_ino;
 			}
 		}
-		pseudo_debug(PDBGF_OP, "creating new '%s' [%llu] to rename\n",
-			oldpath, (unsigned long long) oldbuf.st_ino);
-		pseudo_client_op(OP_LINK, 0, -1, olddirfd, oldpath, &oldbuf);
+		if (pseudo_client_ignore_path(oldpath)) {
+			/* oldpath is ignored (not in INCLUDE_PATHS), so
+			 * OP_LINK on it would be silently dropped and the
+			 * subsequent OP_RENAME would be a no-op. Instead,
+			 * create the entry directly at newpath.
+			 * OP_LINK does not override uid/gid with pseudo_fuid/
+			 * pseudo_fgid (unlike OP_CREAT), so set them explicitly
+			 * to avoid recording the host user's real ids.
+			 */
+			oldbuf.st_uid = pseudo_fuid;
+			oldbuf.st_gid = pseudo_fgid;
+			pseudo_debug(PDBGF_OP, "creating new '%s' [%llu] directly at newpath (oldpath ignored)\n",
+				newpath, (unsigned long long) oldbuf.st_ino);
+			pseudo_client_op(OP_LINK, 0, -1, newdirfd, newpath, &oldbuf);
+		} else {
+			pseudo_debug(PDBGF_OP, "creating new '%s' [%llu] to rename\n",
+				oldpath, (unsigned long long) oldbuf.st_ino);
+			pseudo_client_op(OP_LINK, 0, -1, olddirfd, oldpath, &oldbuf);
+			pseudo_client_op(OP_RENAME, 0, olddirfd, newdirfd, newpath, &oldbuf, oldpath);
+		}
+	} else {
+		/* special case: use 'fd' for olddirfd, because
+		 * we know it has no other meaning for RENAME
+		 */
+		pseudo_client_op(OP_RENAME, 0, olddirfd, newdirfd, newpath, &oldbuf, oldpath);
 	}
-	/* special case: use 'fd' for olddirfd, because
-	 * we know it has no other meaning for RENAME
-	 */
-	pseudo_client_op(OP_RENAME, 0, olddirfd, newdirfd, newpath, &oldbuf, oldpath);
 
 	errno = save_errno;
 /*	return rc;

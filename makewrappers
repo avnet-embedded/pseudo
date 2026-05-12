@@ -430,7 +430,9 @@ class Function:
             return "0"
 
         mainpath = None
-        if "oldpath" in self.paths_to_munge:
+        if "oldpath" in self.paths_to_munge and "newpath" in self.paths_to_munge:
+            return "(pseudo_client_ignore_path(oldpath) && pseudo_client_ignore_path(newpath))"
+        elif "oldpath" in self.paths_to_munge:
             mainpath = "oldpath"
         elif "newpath" in self.paths_to_munge:
             mainpath = "newpath"
