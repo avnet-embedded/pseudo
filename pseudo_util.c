@@ -63,6 +63,7 @@ static struct pseudo_variables pseudo_env[] = {
 #endif
 	{ "PSEUDO_EVLOG", 12, NULL },
 	{ "PSEUDO_EVLOG_FILE", 17, NULL },
+	{ "PSEUDO_SEVERITY", 15, NULL },
 	{ NULL, 0, NULL } /* Magic terminator */
 };
 
@@ -84,6 +85,7 @@ static int pseudo_evlog_next_entry = 0;
 static void pseudo_evlog_set(char *);
 static void pseudo_evlog_flags_finalize(void);
 static unsigned long pseudo_debug_flags_in(char *);
+static unsigned long pseudo_severity_flags_in(char *);
 
 /* -1 - init hasn't been run yet
  * 0 - init has been run
@@ -241,10 +243,17 @@ pseudo_init_util(void) {
 		pseudo_evlog_flags_finalize();
 	}
 	free(env);
+	env = pseudo_get_value("PSEUDO_SEVERITY");
+	if (env) {
+		pseudo_severity_set(env);
+		pseudo_severity_flags_finalize();
+	}
+	free(env);
 }
 
 unsigned long pseudo_util_debug_flags = 0;
 unsigned long pseudo_util_evlog_flags = 0;
+unsigned long pseudo_util_severity_flags = 0;
 int pseudo_util_debug_fd = 2;
 int pseudo_util_evlog_fd = 2;
 static int debugged_newline = 1;
@@ -427,6 +436,11 @@ pseudo_evlog_set(char *s) {
 	pseudo_util_evlog_flags = pseudo_debug_flags_in(s);
 }
 
+void
+pseudo_severity_set(char *s) {
+	pseudo_util_severity_flags = pseudo_severity_flags_in(s);
+}
+
 /* This exists because we don't want to allocate a bunch of strings
  * and free them immediately if you have several flags set.
  */
@@ -451,6 +465,11 @@ pseudo_evlog_flags_finalize(void) {
 	pseudo_flags_finalize(pseudo_util_evlog_flags, "PSEUDO_EVLOG");
 }
 
+void
+pseudo_severity_flags_finalize(void) {
+	pseudo_flags_finalize(pseudo_util_severity_flags, "PSEUDO_SEVERITY");
+}
+
 static unsigned long
 pseudo_debug_flags_in(char *s) {
 	unsigned long flags = 0;
@@ -463,6 +482,31 @@ pseudo_debug_flags_in(char *s) {
 		}
 	}
 	return flags;
+}
+
+static unsigned long
+pseudo_severity_flags_in(char *s) {
+	unsigned long flags = 0;
+	char *token = NULL;
+	char *saveptr = NULL;
+	char *s_copy = NULL;
+
+	if (!s)
+		return flags;
+
+	s_copy = strdup(s);
+
+	token = strtok_r(s_copy, " ,;", &saveptr);
+	while (token != NULL) {
+		pseudo_sev_t id = pseudo_sev_id(token);
+		if (id > SEVERITY_NONE && id < SEVERITY_MAX) {
+				flags |= (1UL << id);
+			}
+		token = strtok_r(NULL, " ,;", &saveptr);
+	}
+
+	free(s_copy);
+	return flags;	
 }
 
 void

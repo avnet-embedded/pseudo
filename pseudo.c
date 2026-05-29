@@ -134,7 +134,7 @@ main(int argc, char *argv[]) {
 	 * wrong.  The + suppresses this annoying behavior, but may not
 	 * be compatible with sane option libraries.
 	 */
-	while ((o = getopt(argc, argv, "+BCdfhi:lm:M:p:P:r:R:St:vVx:")) != -1) {
+	while ((o = getopt(argc, argv, "+BCdfhi:klm:M:p:P:r:R:St:vVx:")) != -1) {
 		switch (o) {
 		case 'B': /* rebuild database */
 			opt_B = 1;
@@ -230,6 +230,9 @@ main(int argc, char *argv[]) {
 				PSEUDO_PREFIX);
 			printf("Set PSEUDO_PREFIX to run with a different prefix.\n");
 			exit(0);
+			break;
+		case 'k': /* debug severity */
+			pseudo_severity_set(optarg);
 			break;
 		case 'x': /* debug flags */
 			pseudo_debug_set(optarg);
