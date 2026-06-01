@@ -87,7 +87,10 @@ extern int read_pidfile(FILE *, int *);
  * When doing anything which actually writes to the filesystem, we add in
  * the user read/write/execute bits.  When storing to the database, though,
  * we mask out any such bits which weren't in the original mode.
+ *
+ * Note: PSEUDO_DB_MODE must be kept in sync with PSEUDO_FS_MODE, as the
+ * former defined which filesystem mode bits must be loaded from the DB.
  */
 #define PSEUDO_FS_MODE(mode, isdir) (((mode) | S_IRUSR | S_IWUSR | ((isdir) ? S_IXUSR : 0)) & ~(S_IWGRP | S_IWOTH))
-#define PSEUDO_DB_MODE(fs_mode, user_mode) (((fs_mode) & ~0722) | ((user_mode & 0722)))
+#define PSEUDO_DB_MODE(fs_mode, user_mode) (((fs_mode) & ~(S_IRUSR | S_IWUSR | S_IXUSR | S_IWGRP | S_IWOTH)) | ((user_mode) & (S_IRUSR | S_IWUSR | S_IXUSR | S_IWGRP | S_IWOTH)))
 
