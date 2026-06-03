@@ -88,7 +88,7 @@ extern int read_pidfile(FILE *, int *);
  * the user read/write/execute bits.  When storing to the database, though,
  * we mask out any such bits which weren't in the original mode.
  *
- * Additional setuid/setgid modes are also filteed as they are unsafe as
+ * Additional setuid/setgid modes are also filtered as they are unsafe as
  * a real executable may allow someone to setuid/gid as the running user.
  *
  * Note: PSEUDO_DB_MODE must be kept in sync with PSEUDO_FS_MODE, as the
