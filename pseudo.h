@@ -42,6 +42,23 @@ extern int pseudo_evlog_internal(char *, ...) __attribute__ ((format (printf, 1,
 } while (0) 
 extern void pseudo_evlog_dump(void);
 #ifndef NDEBUG
+#define pseudo_critical(fmt, ...) do { \
+	pseudo_diag("CRITICAL: " fmt, ##__VA_ARGS__); \
+	abort(); \
+} while (0)
+#define pseudo_error(fmt, ...) do { \
+	pseudo_diag("ERROR: " fmt, ##__VA_ARGS__); \
+} while (0)
+#define pseudo_warning(fmt, ...) do { \
+	if (pseudo_util_severity_flags & SEVERITYF_WARN) { \
+		pseudo_diag("WARNING: " fmt, ##__VA_ARGS__); \
+	} \
+} while (0)
+#define pseudo_info(fmt, ...) do { \
+	if (pseudo_util_severity_flags & SEVERITYF_INFO) { \
+		pseudo_diag("INFO: " fmt, ##__VA_ARGS__); \
+	} \
+} while (0)
 #define pseudo_debug(x, ...) do { \
 	if ((x) & PDBGF_VERBOSE) { \
 		if ((pseudo_util_debug_flags & PDBGF_VERBOSE) && (pseudo_util_debug_flags & ((x) & ~PDBGF_VERBOSE))) { pseudo_diag(__VA_ARGS__); } \
