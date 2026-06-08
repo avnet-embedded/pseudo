@@ -1,4 +1,4 @@
-sev: SEVERITY
+sev: SEVERITY; FLAGS
 debug
 info
 warn
