@@ -13,7 +13,7 @@
 	char *pseudo_path;
 
 	if (flags & OPEN_TREE_CLONE) {
-		pseudo_diag("ERROR: OPEN_TREE_CLONE is not supported\n");
+		pseudo_error("OPEN_TREE_CLONE is not supported\n");
 	}
 
 	if (path && path[0] == '/') {
