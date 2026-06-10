@@ -522,7 +522,7 @@ pseudo_debug_clear(char *s) {
 }
 
 int
-pseudo_diag(char *fmt, ...) {
+pseudo_log(char *fmt, ...) {
 	va_list ap;
 	char debuff[8192];
 	int len;
