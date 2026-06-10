@@ -132,6 +132,8 @@ extern char *pseudo_version;
 #define PSEUDO_PIDFILE "pseudo.pid"
 #define PSEUDO_SOCKET "pseudo.socket"
 
+#define PSEUDO_SEVERITY_DEFAULT "info,warn,error"
+
 /* some systems might not have *at().  We like to define operations in
  * terms of each other, and for instance, open(...) is the same as
  * openat(AT_FDCWD, ...).  If no AT_FDCWD is provided, any value that can't
