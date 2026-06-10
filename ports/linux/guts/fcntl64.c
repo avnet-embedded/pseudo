@@ -89,7 +89,7 @@
 		break;
 #endif
 	default:
-		pseudo_diag("unknown fcntl64 argument %d, assuming long argument.\n",
+		pseudo_error("unknown fcntl64 argument %d, assuming long argument.\n",
 			cmd);
 		rc = real_fcntl64(fd, cmd, arg);
 		break;

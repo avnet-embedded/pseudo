@@ -68,7 +68,7 @@ static void NFTW_DELETE_FN_NAME() {
             NFTW_STORAGE_ARRAY_NAME = NULL;
             --NFTW_STORAGE_ARRAY_SIZE;
         } else {
-            pseudo_diag("%s: Invalid callback storage content, can't find corresponding data", __func__);
+            pseudo_error("%s: Invalid callback storage content, can't find corresponding data", __func__);
         }
         return;
     }
@@ -82,7 +82,7 @@ static void NFTW_DELETE_FN_NAME() {
     }
 
     if (found_idx == -1) {
-        pseudo_diag("%s: Invalid callback storage content, can't find corresponding data", __func__);
+        pseudo_error("%s: Invalid callback storage content, can't find corresponding data", __func__);
         return;
     }
 
@@ -102,7 +102,7 @@ static int NFTW_CALLBACK_NAME(const char* fpath, const struct NFTW_STAT_STRUCT _
     struct NFTW_STAT_STRUCT pseudo_sb;
 
     if (!NFTW_FIND_FN_NAME(&saved_details)) {
-        pseudo_diag("%s: Could not find corresponding callback!", __func__);
+        pseudo_error("%s: Could not find corresponding callback!", __func__);
         return -1;
     }
 

@@ -66,9 +66,8 @@ static int
 posix_permissions(const acl_header *header, int entries, int *extra, int *mode) {
 	int acl_seen = 0;
 	if (le32(header->version) != 2) {
-		pseudo_diag("Fatal: ACL support not available for header version %d.\n",
+		pseudo_critical("Fatal: ACL support not available for header version %d.\n",
 			le32(header->version));
-		return -1;
 	}
 	*mode = 0;
 	*extra = 0;

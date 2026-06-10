@@ -12,7 +12,7 @@
 	static char pwbuf[PSEUDO_PWD_MAX];
 	struct passwd *pwp;
 
-	pseudo_diag("warning: unsafe getpw() called.  hoping buf has at least %d chars.\n",
+	pseudo_warning("unsafe getpw() called.  hoping buf has at least %d chars.\n",
 		PSEUDO_PWD_MAX);
 	rc = wrap_getpwuid_r(uid, &pwd, pwbuf, PSEUDO_PWD_MAX, &pwp);
 	/* different error return conventions */

@@ -243,7 +243,7 @@ pseudo_magic() {
 
 static void
 pseudo_enosys(const char *func) {
-	pseudo_diag("pseudo: ENOSYS for '%s'.\n", func ? func : "<nil>");
+	pseudo_info("pseudo: ENOSYS for '%s'.\n", func ? func : "<nil>");
 	char * value = pseudo_get_value("PSEUDO_ENOSYS_ABORT");
 	if (value)
 		abort();
