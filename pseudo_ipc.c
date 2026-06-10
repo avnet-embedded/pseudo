@@ -165,7 +165,7 @@ pseudo_msg_receive(int fd) {
 	if (!incoming || header.pathlen >= incoming_pathlen) {
 		newmsg = pseudo_msg_new(header.pathlen + 128, 0);
 		if (!newmsg) {
-			pseudo_diag("Couldn't allocate header for path of %d bytes.\n",
+			pseudo_error("Couldn't allocate header for path of %d bytes.\n",
 				(int) header.pathlen);
 			return 0;
 		}

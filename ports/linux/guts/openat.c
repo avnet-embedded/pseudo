@@ -112,9 +112,8 @@
 		 * stack to stuff that's going to try to drop the lock.
 		 */
 		if (pseudo_getlock()) {
-			pseudo_diag("PANIC: after opening a readonly/writeonly FIFO (path '%s', fd %d, errno %d, saved errno %d), could not regain lock. unrecoverable. sorry. bye.\n",
+			pseudo_critical("after opening a readonly/writeonly FIFO (path '%s', fd %d, errno %d, saved errno %d), could not regain lock. unrecoverable. sorry. bye.\n",
 				path, rc, errno, save_errno);
-			abort();
 		}
 		errno = save_errno;
 	}

@@ -11,7 +11,7 @@
 	/* let gcc know we ignored these on purpose */
 	(void) template;
 	(void) pfx;
-	pseudo_diag("tempnam() is so ludicrously insecure as to defy implementation.");
+	pseudo_warning("tempnam() is so ludicrously insecure as to defy implementation.");
 	errno = ENOMEM;
 	rc = NULL;
 

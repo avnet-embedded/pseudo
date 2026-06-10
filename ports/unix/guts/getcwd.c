@@ -11,7 +11,7 @@
 	pseudo_debug(PDBGF_CLIENT, "wrap_getcwd: %p, %lu\n",
 		(void *) buf, (unsigned long) size);
 	if (!pseudo_cwd) {
-		pseudo_diag("Asked for CWD, but don't have it!\n");
+		pseudo_error("Asked for CWD, but don't have it!\n");
 		errno = EACCES;
 		return NULL;
 	}
@@ -33,13 +33,13 @@
 		if (size) {
 			buf = malloc(size);
 		} else {
-			pseudo_diag("can't figure out CWD: length %ld + 1 - %ld => %ld\n",
+			pseudo_error("can't figure out CWD: length %ld + 1 - %ld => %ld\n",
 				(unsigned long) pseudo_cwd_len,
 				(unsigned long) pseudo_chroot_len,
 				(unsigned long) size);
 		}
 		if (!buf) {
-			pseudo_diag("couldn't allocate requested CWD buffer - need %ld byes\n",
+			pseudo_error("couldn't allocate requested CWD buffer - need %ld byes\n",
 				(unsigned long) size);
 			errno = ENOMEM;
 			return NULL;
