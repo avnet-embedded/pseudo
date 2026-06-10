@@ -23,7 +23,7 @@
 		 * with that flag unless the real AT functions exist, so 
 		 * something must have gone horribly wrong....
 		 */
-		pseudo_diag("wrap_unlinkat called with flags (0x%x), path '%s'\n",
+		pseudo_info("wrap_unlinkat called with flags (0x%x), path '%s'\n",
 			rflags, path ? path : "<nil>");
 		errno = ENOSYS;
 		return -1;

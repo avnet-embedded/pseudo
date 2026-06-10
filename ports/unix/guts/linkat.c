@@ -87,7 +87,7 @@
 		rc2 = base_lstat(oldpath, &buf);
 	}
 	if (rc2 == -1) {
-		pseudo_diag("Fatal: Tried to stat '%s' after linking it, but failed: %s.\n",
+		pseudo_error("Fatal: Tried to stat '%s' after linking it, but failed: %s.\n",
 			oldpath, strerror(errno));
 		errno = ENOENT;
 		return rc2;

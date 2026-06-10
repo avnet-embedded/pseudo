@@ -38,7 +38,7 @@
 #endif
 	if (rc == -1) {
 		int save_errno = errno;
-		pseudo_diag("symlinkat: couldn't stat '%s' even though symlink creation succeeded (%s).\n",
+		pseudo_warning("symlinkat: couldn't stat '%s' even though symlink creation succeeded (%s).\n",
 			newpath, strerror(errno));
 		errno = save_errno;
 		free(roldname);

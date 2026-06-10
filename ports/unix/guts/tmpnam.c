@@ -11,7 +11,7 @@
 
 	/* let gcc know we're ignoring this */
 	(void) s;
-	pseudo_diag("tmpnam() is so ludicrously insecure as to defy implementation.");
+	pseudo_warning("tmpnam() is so ludicrously insecure as to defy implementation.");
 	errno = ENOMEM;
 	rc = NULL;
 
