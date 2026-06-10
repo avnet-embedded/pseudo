@@ -244,10 +244,11 @@ pseudo_init_util(void) {
 	}
 	free(env);
 	env = pseudo_get_value("PSEUDO_SEVERITY");
-	if (env) {
-		pseudo_severity_set(env);
-		pseudo_severity_flags_finalize();
+	if (!env) {
+		env = strdup(PSEUDO_SEVERITY_DEFAULT);
 	}
+	pseudo_severity_set(env);
+	pseudo_severity_flags_finalize();
 	free(env);
 }
 
