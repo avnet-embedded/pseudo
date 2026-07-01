@@ -72,15 +72,9 @@ typedef struct {
 	char *data;
 } pseudo_evlog_entry;
 
-/* so bash overrides getenv/unsetenv/etcetera, preventing them from
- * actually modifying environ, so we have pseudo_wrappers try to dlsym
- * the right values. This could fail, in which case we'd get null
- * pointers, and we'll just call whatever the linker gives us and
- * hope for the best.
- */
-#define SETENV(x, y, z) (pseudo_real_setenv ? pseudo_real_setenv : setenv)(x, y, z)
-#define GETENV(x) (pseudo_real_getenv ? pseudo_real_getenv : getenv)(x)
-#define UNSETENV(x) (pseudo_real_unsetenv ? pseudo_real_unsetenv : unsetenv)(x)
+#define SETENV(x, y, z) setenv(x, y, z)
+#define GETENV(x) getenv(x)
+#define UNSETENV(x) unsetenv(x)
 
 #define PSEUDO_EVLOG_ENTRIES 250
 #define PSEUDO_EVLOG_LENGTH 256

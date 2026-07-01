@@ -8,6 +8,7 @@
  * wrap_execvp(const char *file, char *const *argv) {
  *	int rc = -1;
  */
+	char **new_environ, **orig_environ;
 
 	/* note:  we don't canonicalize this, because we are intentionally
 	 * NOT redirecting execs into the chroot environment.  If you try
@@ -20,15 +21,23 @@
                 pseudo_client_op(OP_EXEC, PSA_EXEC, -1, -1, path_guess, 0);
         }
 
-	pseudo_setupenv();
-	if (pseudo_has_unload(NULL))
-		pseudo_dropenv();
+	/* Due to bash intercepting setenv/getenv/unsetenv and changing environ 
+	   internally itself at will, we create our own environ copy at process
+	   creation based on it to ensure it is correct */
+	orig_environ = environ;
+	new_environ = pseudo_setupenvp(environ);
+	if (pseudo_has_unload(new_environ))
+		new_environ = pseudo_dropenvp(new_environ);
+	environ = new_environ;
 
 	/* if exec() fails, we may end up taking signals unexpectedly...
 	 * not much we can do about that.
 	 */
 	sigprocmask(SIG_SETMASK, &pseudo_saved_sigmask, NULL);
 	rc = real_execvp(file, argv);
+
+	environ = orig_environ;
+	free(new_environ);
 
 /*	return rc;
  * }

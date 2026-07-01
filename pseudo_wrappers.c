@@ -173,12 +173,6 @@ pseudo_init_wrappers(void) {
 	pseudo_real_fsetxattr = real_fsetxattr;
 #endif
 	pseudo_real_lstat = base_lstat;
-	/* bash has its own local copies of these which it uses
-	 * instead of ours...
-	 */
-	pseudo_real_unsetenv = dlsym(RTLD_NEXT, "unsetenv");
-	pseudo_real_getenv = dlsym(RTLD_NEXT, "getenv");
-	pseudo_real_setenv = dlsym(RTLD_NEXT, "setenv");
 	/* and these are used so the client's server spawn can bypass
 	 * wrappers.
 	 */
