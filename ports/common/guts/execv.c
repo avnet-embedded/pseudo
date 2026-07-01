@@ -37,7 +37,7 @@
 	rc = real_execv(file, argv);
 
 	environ = orig_environ;
-	free(new_environ);
+	pseudo_free_envp(new_environ);
 
 /*	return rc;
  * }

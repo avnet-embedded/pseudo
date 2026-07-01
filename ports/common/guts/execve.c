@@ -30,7 +30,7 @@
 	sigprocmask(SIG_SETMASK, &pseudo_saved_sigmask, NULL);
 	rc = real_execve(file, argv, new_environ);
 
-	free(new_environ);
+	pseudo_free_envp(new_environ);
 
 /*	return rc;
  * }

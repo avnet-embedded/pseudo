@@ -1250,6 +1250,17 @@ pseudo_setupenvp(char * const *envp) {
 	return new_envp;
 }
 
+/* Free data allocated by pseudo_setupenvp() */
+void
+pseudo_free_envp(char **envp) {
+	int i;
+
+	for (i = 0; envp && envp[i]; ++i) {
+		free(envp[i]);
+	}
+	free(envp);
+}
+
 /* Append the file value to the prefix value. */
 char *
 pseudo_append_path(const char * prefix, size_t prefix_len, char *file) {

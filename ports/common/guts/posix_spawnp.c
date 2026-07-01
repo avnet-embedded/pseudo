@@ -29,7 +29,7 @@
 	sigprocmask(SIG_SETMASK, &pseudo_saved_sigmask, NULL);
 	rc = real_posix_spawnp(pid, file, file_actions, attrp, argv, new_environ);
 
-	free(new_environ);
+	pseudo_free_envp(new_environ);
 
 /*	return rc;
  * }

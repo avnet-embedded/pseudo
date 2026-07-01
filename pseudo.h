@@ -69,6 +69,7 @@ extern void pseudo_dropenv(void);
 extern char **pseudo_dropenvp(char **);
 extern void pseudo_setupenv(void);
 extern char **pseudo_setupenvp(char * const *);
+extern void pseudo_free_envp(char **envp);
 extern char *pseudo_prefix_path(char *);
 extern char *pseudo_bindir_path(char *);
 extern char *pseudo_libdir_path(char *);
