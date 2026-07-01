@@ -66,7 +66,7 @@ void pseudo_new_pid(void);
 #define PSEUDO_MAX_LINK_RECURSION 16
 extern char *pseudo_fix_path(const char *, const char *, size_t, size_t, size_t *, int);
 extern void pseudo_dropenv(void);
-extern char **pseudo_dropenvp(char * const *);
+extern char **pseudo_dropenvp(char **);
 extern void pseudo_setupenv(void);
 extern char **pseudo_setupenvp(char * const *);
 extern char *pseudo_prefix_path(char *);

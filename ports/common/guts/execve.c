@@ -8,7 +8,7 @@
  * wrap_execve(const char *file, char *const *argv, char *const *envp) {
  *	int rc = -1;
  */
-	char * const *new_environ;
+	char **new_environ;
 	/* note:  we don't canonicalize this, because we are intentionally
 	 * NOT redirecting execs into the chroot environment.  If you try
 	 * to execute /bin/sh, you get the actual /bin/sh, not
@@ -29,6 +29,8 @@
 	 */
 	sigprocmask(SIG_SETMASK, &pseudo_saved_sigmask, NULL);
 	rc = real_execve(file, argv, new_environ);
+
+	free(new_environ);
 
 /*	return rc;
  * }

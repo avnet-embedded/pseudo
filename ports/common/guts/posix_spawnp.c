@@ -7,7 +7,7 @@
  * wrap_posix_spawnp(pid_t *pid, const char *file, const posix_spawn_file_actions_t *file_actions, const posix_spawnattr_t *attrp, char *const *argv, char *const *envp) {
  *	int rc = -1;
  */
-	char * const *new_environ;
+	char **new_environ;
 	/* note:  we don't canonicalize this, because we are intentionally
 	 * NOT redirecting execs into the chroot environment.  If you try
 	 * to execute /bin/sh, you get the actual /bin/sh, not
@@ -28,6 +28,8 @@
 	 */
 	sigprocmask(SIG_SETMASK, &pseudo_saved_sigmask, NULL);
 	rc = real_posix_spawnp(pid, file, file_actions, attrp, argv, new_environ);
+
+	free(new_environ);
 
 /*	return rc;
  * }
