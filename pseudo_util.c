@@ -336,12 +336,12 @@ without_libpseudo(char *list) {
 	if (list[0] == '=' || list[0] == PSEUDO_LINKPATH_SEPARATOR[0])
 		skip_start = 1;
 
-	if ((*real_regexec)(&libpseudo_regex, list, 1, pmatch, 0)) {
-		return list;
-	}
 	list = strdup(list);
 	if (!list) {
 		pseudo_diag("Couldn't allocate memory to remove libpseudo from environment.\n");
+	}
+	if ((*real_regexec)(&libpseudo_regex, list, 1, pmatch, 0)) {
+		return list;
 	}
 	while (list && !(*real_regexec)(&libpseudo_regex, list, 1, pmatch, 0)) {
 		char *start = list + pmatch[0].rm_so;
