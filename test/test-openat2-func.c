@@ -109,7 +109,6 @@ int main(void) {
 	int dirfd = -1;
 	int fd = -1;
 	int rc = 1;
-	int saved_errno;
 	struct open_how how;
 	char cwd_save[PATH_MAX];
 	int cwd_saved = 0;
