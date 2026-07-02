@@ -842,7 +842,7 @@ pseudo_append_elements(char *newpath, char *root, size_t allocated, char **curre
 	while (path < (start + elen) && *path) {
 		size_t this_elen;
 		int leave_this = 0;
-		char *next = strchr(path, '/');
+		const char *next = strchr(path, '/');
 		if (!next) {
 			next = strchr(path, '\0');
 			leave_this = leave_last;
