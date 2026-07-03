@@ -14,6 +14,4 @@ mkdir -p "$CHROOTDIR"
 touch "$CHROOTDIR/a"
 trap "rm -rf $(pwd)/linkat_chroot_test test-linkat-chroot" 0
 
-gcc -o test-linkat-chroot test/test-linkat-chroot.c
-
-./test-linkat-chroot "$CHROOTDIR"
+$(dirname "$0")/test-linkat-chroot "$CHROOTDIR"
