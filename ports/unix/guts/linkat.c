@@ -35,13 +35,18 @@
 	}
 #endif
 	oldpath = oldname;
-	if (pseudo_chroot_len && !strncmp(oldpath, pseudo_chroot, pseudo_chroot_len) &&
+	if (oldpath && *oldpath && pseudo_chroot_len && !strncmp(oldpath, pseudo_chroot, pseudo_chroot_len) &&
 		oldpath[pseudo_chroot_len] == '/') {
 		oldpath += pseudo_chroot_len;
 	}
 
 	newpath = pseudo_root_path(__func__, __LINE__, newdirfd, newname, AT_SYMLINK_NOFOLLOW);
 
+	if ((!oldpath || !*oldpath) && (flags & AT_EMPTY_PATH)) {
+		tmpfile_fd = olddirfd;
+		// call actual link
+		rc = real_linkat(olddirfd, "", AT_FDCWD, newpath, flags);
+	} else
 	/* weird special case: if you link /proc/self/fd/N, you're supposed
 	 * to get a link to fd N. Used in conjunction with opening a directory
 	 * with O_TMPFILE in flags, which actually opens an already-deleted
