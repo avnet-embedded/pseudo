@@ -1936,15 +1936,15 @@ pseudo_client_op(pseudo_op_t op, int access, int fd, int dirfd, const char *path
 	case OP_CLOSEFROM:
 		/* no request needed */
 		startfd = fd;
-		if (pseudo_util_debug_fd > startfd)
+		if (pseudo_util_debug_fd >= startfd)
 			startfd = pseudo_util_debug_fd + 1;
-		if (pseudo_localstate_dir_fd > startfd)
+		if (pseudo_localstate_dir_fd >= startfd)
 			startfd = pseudo_localstate_dir_fd + 1;
-		if (pseudo_pwd_fd > startfd)
+		if (pseudo_pwd_fd >= startfd)
 			startfd = pseudo_pwd_fd + 1;
-		if (pseudo_grp_fd > startfd)
+		if (pseudo_grp_fd >= startfd)
 			startfd = pseudo_grp_fd + 1;
-		if (connect_fd > startfd)
+		if (connect_fd >= startfd)
 			startfd = connect_fd + 1;
 		for (i = fd; i < startfd; ++i) {
 			if (i == pseudo_util_debug_fd || i == pseudo_localstate_dir_fd || i == pseudo_pwd_fd ||
