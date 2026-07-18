@@ -29,6 +29,7 @@ extern void pseudo_debug_flags_finalize(void);
 extern unsigned long pseudo_util_debug_flags;
 extern unsigned long pseudo_util_evlog_flags;
 extern int pseudo_util_debug_fd;
+extern int pseudo_util_evlog_fd;
 extern int pseudo_disabled;
 extern int pseudo_allow_fsync;
 extern int pseudo_diag(char *, ...) __attribute__ ((format (printf, 1, 2)));
