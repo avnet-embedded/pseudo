@@ -15,7 +15,6 @@ libpseudo execution flow:
 			setup pseudo_logfile
 		pseudo_client.c: pseudo_init_client()
 			setup PSEUDO_DISABLED
-			setup pseudo_prefix_dir_fd
 			setup pseudo_localstate_dir_fd
 			setup PSEUDO_NOSYMLINKEXP
 			setup PSEUDO_UIDS

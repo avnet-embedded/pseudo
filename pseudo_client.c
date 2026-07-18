@@ -46,7 +46,6 @@ static char *base_path(int dirfd, const char *path, int leave_last);
 
 static int connect_fd = -1;
 static int server_pid = 0;
-int pseudo_prefix_dir_fd = -1;
 int pseudo_localstate_dir_fd = -1;
 int pseudo_pwd_fd = -1;
 int pseudo_pwd_lck_fd = -1;
@@ -532,7 +531,6 @@ pseudo_init_client(void) {
 	if (!pseudo_inited) {
 		/* Ensure that all of the values are reset */
 		server_pid = 0;
-		pseudo_prefix_dir_fd = -1;
 		pseudo_localstate_dir_fd = -1;
 		pseudo_pwd_fd = -1;
 		pseudo_pwd_lck_fd = -1;
@@ -554,30 +552,6 @@ pseudo_init_client(void) {
 
 		pseudo_umask = umask(022);
 		umask(pseudo_umask);
-
-		pseudo_path = pseudo_prefix_path(NULL);
-		if (pseudo_prefix_dir_fd == -1) {
-			if (pseudo_path) {
-				pseudo_prefix_dir_fd = open(pseudo_path, O_RDONLY);
-				/* directory is missing? */
-				if (pseudo_prefix_dir_fd == -1 && errno == ENOENT) {
-					pseudo_debug(PDBGF_CLIENT, "prefix directory '%s' doesn't exist, trying to create\n", pseudo_path);
-					mkdir_p(pseudo_path);
-					pseudo_prefix_dir_fd = open(pseudo_path, O_RDONLY);
-				}
-				pseudo_prefix_dir_fd = pseudo_fd(pseudo_prefix_dir_fd, MOVE_FD);
-			} else {
-				pseudo_diag("No prefix available to to find server.\n");
-				exit(1);
-			}
-			if (pseudo_prefix_dir_fd == -1) {
-				pseudo_diag("Can't open prefix path '%s' for server: %s\n",
-					pseudo_path,
-					strerror(errno));
-				exit(1);
-			}
-		}
-		free(pseudo_path);
 		pseudo_path = pseudo_localstatedir_path(NULL);
 		if (pseudo_localstate_dir_fd == -1) {
 			if (pseudo_path) {
@@ -1417,29 +1391,6 @@ pseudo_client_shutdown(int wait_on_socket) {
 	char *pseudo_path;
 
 	pseudo_debug(PDBGF_INVOKE, "attempting to shut down server.\n");
-	pseudo_path = pseudo_prefix_path(NULL);
-	if (pseudo_prefix_dir_fd == -1) {
-		if (pseudo_path) {
-			pseudo_prefix_dir_fd = open(pseudo_path, O_RDONLY);
-			/* directory is missing? */
-			if (pseudo_prefix_dir_fd == -1 && errno == ENOENT) {
-				pseudo_debug(PDBGF_CLIENT, "prefix directory doesn't exist, trying to create\n");
-				mkdir_p(pseudo_path);
-				pseudo_prefix_dir_fd = open(pseudo_path, O_RDONLY);
-			}
-			pseudo_prefix_dir_fd = pseudo_fd(pseudo_prefix_dir_fd, COPY_FD);
-			free(pseudo_path);
-		} else {
-			pseudo_diag("No prefix available to to find server.\n");
-			exit(1);
-		}
-		if (pseudo_prefix_dir_fd == -1) {
-			pseudo_diag("Can't open prefix path (%s) for server. (%s)\n",
-				pseudo_prefix_path(NULL),
-				strerror(errno));
-			exit(1);
-		}
-	}
 	pseudo_path = pseudo_localstatedir_path(NULL);
 	mkdir_p(pseudo_path);
 	if (pseudo_localstate_dir_fd == -1) {
@@ -1940,8 +1891,6 @@ pseudo_client_op(pseudo_op_t op, int access, int fd, int dirfd, const char *path
 			startfd = pseudo_util_debug_fd + 1;
 		if (pseudo_util_evlog_fd >= startfd)
 			startfd = pseudo_util_evlog_fd + 1;
-		if (pseudo_prefix_dir_fd >= startfd)
-			startfd = pseudo_prefix_dir_fd + 1;
 		if (pseudo_localstate_dir_fd >= startfd)
 			startfd = pseudo_localstate_dir_fd + 1;
 		if (pseudo_pwd_fd >= startfd)
@@ -1954,9 +1903,9 @@ pseudo_client_op(pseudo_op_t op, int access, int fd, int dirfd, const char *path
 			startfd = connect_fd + 1;
 		for (i = fd; i < startfd; ++i) {
 			if (i == pseudo_util_debug_fd || i == pseudo_util_evlog_fd ||
-					i == pseudo_prefix_dir_fd || i == pseudo_localstate_dir_fd ||
-					i == pseudo_pwd_fd || i == pseudo_pwd_lck_fd ||
-					i == pseudo_grp_fd || i == connect_fd)
+					i == pseudo_localstate_dir_fd || i == pseudo_pwd_fd ||
+					i == pseudo_pwd_lck_fd || i == pseudo_grp_fd ||
+					i == connect_fd)
 				continue;
 			pseudo_client_close(i);
 			close(i);
@@ -1977,8 +1926,6 @@ pseudo_client_op(pseudo_op_t op, int access, int fd, int dirfd, const char *path
 				}
 			} else if (fd == pseudo_util_debug_fd) {
 				pseudo_util_debug_fd = pseudo_fd(fd, COPY_FD);
-			} else if (fd == pseudo_prefix_dir_fd) {
-				pseudo_prefix_dir_fd = pseudo_fd(fd, COPY_FD);
 			} else if (fd == pseudo_localstate_dir_fd) {
 				pseudo_localstate_dir_fd = pseudo_fd(fd, COPY_FD);
 			} else if (fd == pseudo_pwd_fd) {
