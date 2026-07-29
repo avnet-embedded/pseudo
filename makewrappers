@@ -415,7 +415,7 @@ class Function:
             if self.efault and path in self.efault.split('|'):
                 fix_paths.append(
                     # Emulate EFAULT when path is null
-                    "if (%s == NULL) {\n"
+                    "if ((%s == NULL) && !(flags & AT_EMPTY_PATH)) {\n"
                     "\t\t\terrno = EFAULT;\n"
                     "\t\t\t%s -1;\n"
                     "\t\t\tgoto quick_exit;\n"
