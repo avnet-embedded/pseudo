@@ -950,13 +950,19 @@ pseudo_client_close(int fd) {
 	}
 }
 
+/* Drop the tracked paths for a range of descriptors. The range has a top
+ * end, so entries above it have to be left alone; closefrom() asks for
+ * everything by passing INT_MAX.
+ */
 static void
-pseudo_client_closefrom(int fd) {
-	int i;
-	if (fd < 0 || fd >= nfds)
+pseudo_client_close_range(int lowfd, unsigned int maxfd) {
+	int i, top;
+
+	if (lowfd < 0 || lowfd >= nfds)
 		return;
 
-	for (i = fd; i < nfds; ++i) {
+	top = (maxfd >= (unsigned int) nfds) ? nfds - 1 : (int) maxfd;
+	for (i = lowfd; i <= top; ++i) {
 		free(fd_paths[i]);
 		fd_paths[i] = 0;
 
@@ -1584,6 +1590,7 @@ pseudo_client_op(pseudo_op_t op, int access, int fd, int dirfd, const char *path
 	static size_t alloced_len = 0;
 	int strip_slash;
 	int startfd, i;
+	int close_range_maxfd = 0;
 
 #ifdef PSEUDO_PROFILING
 	struct timeval tv1_op, tv2_op;
@@ -1611,7 +1618,7 @@ pseudo_client_op(pseudo_op_t op, int access, int fd, int dirfd, const char *path
 		}
 	}
 
-	if (op != OP_CHROOT && op != OP_CHDIR && op != OP_CLOSE && op != OP_CLOSEFROM && op != OP_DUP
+	if (op != OP_CHROOT && op != OP_CHDIR && op != OP_CLOSE && op != OP_CLOSE_RANGE && op != OP_DUP
 			&& pseudo_client_ignore_path_chroot(path, 0)) {
 		if (op == OP_OPEN) {
 			/* Sanitise the path to have no trailing slash as this is convention in the database */
@@ -1703,6 +1710,13 @@ pseudo_client_op(pseudo_op_t op, int access, int fd, int dirfd, const char *path
 			goto skip_path;
 	}
 #endif
+
+	if (op == OP_CLOSE_RANGE) {
+		va_list ap;
+		va_start(ap, buf);
+		close_range_maxfd = va_arg(ap, int);
+		va_end(ap);
+	}
 
 	if (op == OP_RENAME) {
 		va_list ap;
@@ -1884,7 +1898,7 @@ pseudo_client_op(pseudo_op_t op, int access, int fd, int dirfd, const char *path
 	case OP_EXEC:
 		do_request = pseudo_client_logging;
 		break;
-	case OP_CLOSEFROM:
+	case OP_CLOSE_RANGE:
 		/* no request needed */
 		startfd = fd;
 		if (pseudo_util_debug_fd >= startfd)
@@ -1901,7 +1915,10 @@ pseudo_client_op(pseudo_op_t op, int access, int fd, int dirfd, const char *path
 			startfd = pseudo_grp_fd + 1;
 		if (connect_fd >= startfd)
 			startfd = connect_fd + 1;
-		for (i = fd; i < startfd; ++i) {
+		/* the fds below startfd are the ones our own are mixed in
+		 * with, so close those by hand and skip the ones we need
+		 */
+		for (i = fd; i < startfd && i <= close_range_maxfd; ++i) {
 			if (i == pseudo_util_debug_fd || i == pseudo_util_evlog_fd ||
 					i == pseudo_localstate_dir_fd || i == pseudo_pwd_fd ||
 					i == pseudo_pwd_lck_fd || i == pseudo_grp_fd ||
@@ -1910,8 +1927,9 @@ pseudo_client_op(pseudo_op_t op, int access, int fd, int dirfd, const char *path
 			pseudo_client_close(i);
 			close(i);
 		}
-		pseudo_client_closefrom(startfd);
-		/* tell the caller to close from startfd instead of fd */
+		if (close_range_maxfd >= startfd)
+			pseudo_client_close_range(startfd, close_range_maxfd);
+		/* tell the caller to start at startfd instead of fd */
 		result = &msg;
 		msg.fd = startfd;
 		do_request = 0;
@@ -1996,7 +2014,7 @@ pseudo_client_op(pseudo_op_t op, int access, int fd, int dirfd, const char *path
 		break;
 	}
 	/* result can only be set when PSEUDO_XATTRDB resulted in a
-	 * successful store to or read from the local database or for OP_CLOSEFROM.
+	 * successful store to or read from the local database or for OP_CLOSE_RANGE.
 	 */
 	if (do_request && !result) {
 #ifdef PSEUDO_PROFILING

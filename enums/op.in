@@ -27,4 +27,4 @@ remove-xattr, 1
 set-xattr, 0
 create-xattr, 1
 replace-xattr, 1
-closefrom, 0
+close-range, 0

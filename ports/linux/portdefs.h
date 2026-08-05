@@ -35,6 +35,22 @@ GLIBC_COMPAT_SYMBOL(memcpy,2.0);
 #include <sys/prctl.h>
 #include <linux/seccomp.h>
 
+/* close_range()'s flags, and unshare(), are only declared by glibc under
+ * _GNU_SOURCE, which pseudo does not build with. <linux/close_range.h> is
+ * not an option either: it is absent on hosts with pre-5.9 kernel headers,
+ * the same problem SYS_openat2 has below. Both values are kernel ABI.
+ */
+#ifndef CLOSE_RANGE_UNSHARE
+#define CLOSE_RANGE_UNSHARE (1U << 1)
+#endif
+#ifndef CLOSE_RANGE_CLOEXEC
+#define CLOSE_RANGE_CLOEXEC (1U << 2)
+#endif
+#ifndef CLONE_FILES
+#define CLONE_FILES 0x00000400
+#endif
+extern int unshare(int flags);
+
 #ifndef _STAT_VER
 #if defined (__aarch64__) || defined (__riscv)
 #define _STAT_VER 0
