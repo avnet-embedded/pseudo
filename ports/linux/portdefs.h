@@ -91,3 +91,12 @@ extern int unshare(int flags);
 
 #define SYS_open_tree __NR_open_tree
 #endif
+
+#ifndef SYS_open_tree_attr
+
+#ifndef __NR_open_tree_attr
+#define __NR_open_tree_attr 467
+#endif
+
+#define SYS_open_tree_attr __NR_open_tree_attr
+#endif
