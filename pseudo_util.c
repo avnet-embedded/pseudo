@@ -161,8 +161,13 @@ pseudo_get_value(const char *key) {
 
 	/* Check if the environment has it and we don't ...
 	 * if so, something went wrong... so we'll attempt to recover
+	 * -- but not while pseudo_init_util() is running.  Its own lookups
+	 * below reach this point, and when a value could not be stored
+	 * (strdup() failed) re-running it fails the same way and recurses
+	 * until the stack overflows.
 	 */
-	if (pseudo_env[i].key && !pseudo_env[i].value && GETENV(pseudo_env[i].key))
+	if (pseudo_util_initted == 0 && pseudo_env[i].key &&
+	    !pseudo_env[i].value && GETENV(pseudo_env[i].key))
 		pseudo_init_util();
 
 	if (pseudo_env[i].value)
@@ -220,8 +225,6 @@ pseudo_init_util(void) {
 			pseudo_set_value(pseudo_env[i].key, GETENV(pseudo_env[i].key));
 	}
 
-	pseudo_util_initted = 0;
-
 	/* Somewhere we have to set the debug level.. */
 	env = pseudo_get_value("PSEUDO_DEBUG");
 	if (env) {
@@ -250,6 +253,8 @@ pseudo_init_util(void) {
 	pseudo_severity_set(env);
 	pseudo_severity_flags_finalize();
 	free(env);
+
+	pseudo_util_initted = 0;
 }
 
 unsigned long pseudo_util_debug_flags = 0;
