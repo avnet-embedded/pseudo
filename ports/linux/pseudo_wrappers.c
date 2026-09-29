@@ -59,6 +59,31 @@ syscall(long number, ...) {
 	long rc = -1;
 	va_list ap;
 
+	/* Reached before real_syscall is resolved: the caller may be a malloc
+	 * implementation initializing itself, and pseudo_check_wrappers()
+	 * would run _libpseudo_init() -> pseudo_init_util(), which allocates.
+	 * Forward the numbers pseudo never rewrites without running that path.
+	 *
+	 * The !real_syscall half of the guard covers a narrower window than
+	 * !_libpseudo_initted alone would: _libpseudo_init() (below) sets
+	 * _libpseudo_initted before it resolves real_syscall via
+	 * pseudo_init_wrappers(), so an allocator whose first touch happens
+	 * from inside the constructor itself - rather than before it runs -
+	 * would otherwise still fall through to pseudo_enosys() below. */
+	if ((!_libpseudo_initted || !real_syscall) && number != SYS_openat2
+#ifdef SYS_renameat2
+	    && number != SYS_renameat2
+#endif
+#ifdef SYS_seccomp
+	    && number != SYS_seccomp
+#endif
+	    ) {
+		if (!real_syscall)
+			real_syscall = (long (*)(long, ...)) dlsym(RTLD_NEXT, "syscall");
+		if (real_syscall)
+			goto call_syscall;
+	}
+
 	if (!pseudo_check_wrappers() || !real_syscall) {
 		/* rc was initialized to the "failure" value */
 		pseudo_enosys("syscall");
@@ -177,6 +202,20 @@ prctl(int option, ...) {
 	int rc = -1;
 	va_list ap;
 
+	/* See syscall() above: covers both the pre-constructor window and the
+	 * mid-constructor one, for every option except the one prctl() itself
+	 * still special-cases below. */
+	if ((!_libpseudo_initted || !real_prctl)
+#ifdef PR_SET_SECCOMP
+	    && option != PR_SET_SECCOMP
+#endif
+	    ) {
+		if (!real_prctl)
+			real_prctl = (int (*)(int, ...)) dlsym(RTLD_NEXT, "prctl");
+		if (real_prctl)
+			goto call_prctl;
+	}
+
 	if (!pseudo_check_wrappers() || !real_prctl) {
 		/* rc was initialized to the "failure" value */
 		pseudo_enosys("prctl");
@@ -196,6 +235,15 @@ prctl(int option, ...) {
 		}
 	}
 #endif
+
+call_prctl:
+	/* On Debian 11 - gcc (Debian 10.2.1-6) this results in:
+	 *   error: a label can only be part of a statement and a declaration
+	 *   is not a statement
+	 *
+	 * adding a ; here resolves this
+	 */
+	;
 
 	/* gcc magic to attempt to just pass these args to prctl. we have to
 	 * guess about the number of args; the docs discuss calling conventions
