@@ -82,3 +82,19 @@ extern int unshare(int flags);
 
 #define SYS_openat2 __NR_openat2
 #endif
+
+#ifndef SYS_open_tree
+
+#ifndef __NR_open_tree
+#define __NR_open_tree 428
+#endif
+
+#define SYS_open_tree __NR_open_tree
+#endif
+
+/* OPEN_TREE_CLONE may be missing from older host headers.
+ */
+#ifndef OPEN_TREE_CLONE
+#define OPEN_TREE_CLONE (1U << 0)
+#endif
+
