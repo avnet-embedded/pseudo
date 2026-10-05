@@ -116,6 +116,22 @@ syscall(long number, ...) {
 #error SYS_open_tree not defined
 #endif
 
+#ifdef SYS_open_tree_attr
+	if (number == SYS_open_tree_attr) {
+		pseudo_debug(PDBGF_SYSCALL, "syscall, faking open_tree_attr.\n");
+		va_start(ap, number);
+		int dirfd = va_arg(ap, int);
+		const char *path = va_arg(ap, const char*);
+		unsigned int flags = va_arg(ap, unsigned int);
+		struct mount_attr *attr = va_arg(ap, struct mount_attr*);
+		size_t size = va_arg(ap, size_t);
+
+		return wrap_open_tree_attr(dirfd, path, flags, attr, size);
+	}
+#else
+#error SYS_open_tree_attr not defined
+#endif
+
 #ifdef SYS_renameat2
         /* Call out wrapper, expanding the variable arguments first */
 	if (number == SYS_renameat2) {

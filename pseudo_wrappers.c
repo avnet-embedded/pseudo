@@ -37,6 +37,7 @@
 #include <grp.h>
 #include <pwd.h>
 #include <utime.h>
+#include <sys/mount.h>
 #ifdef PSEUDO_PORT_LINUX_STATVFS
 #include <sys/statvfs.h>
 #endif
