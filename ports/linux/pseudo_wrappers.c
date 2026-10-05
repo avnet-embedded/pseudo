@@ -102,6 +102,20 @@ syscall(long number, ...) {
 #error SYS_openat2 not defined
 #endif
 
+#ifdef SYS_open_tree
+	if (number == SYS_open_tree) {
+		pseudo_debug(PDBGF_SYSCALL, "syscall, faking open_tree.\n");
+		va_start(ap, number);
+		int dirfd = va_arg(ap, int);
+		const char *path = va_arg(ap, const char*);
+		unsigned int flags = va_arg(ap, unsigned int);
+
+		return wrap_open_tree(dirfd, path, flags);
+	}
+#else
+#error SYS_open_tree not defined
+#endif
+
 #ifdef SYS_renameat2
         /* Call out wrapper, expanding the variable arguments first */
 	if (number == SYS_renameat2) {
