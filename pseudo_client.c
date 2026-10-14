@@ -1791,7 +1791,11 @@ pseudo_client_op(pseudo_op_t op, int access, int fd, int dirfd, const char *path
 	 */
 	if (path_extra_1) {
 		size_t full_len = path_extra_1len + 1 + pathlen - strip_slash;
-		size_t partial_len = pathlen - 1 - strip_slash;
+		size_t partial_len = pathlen - strip_slash;
+		if (!pathlen) {
+			full_len += 1;
+			partial_len = 1;
+		}
 		if (path_extra_2) {
 			full_len += path_extra_2len + 1;
 		}
@@ -1806,12 +1810,14 @@ pseudo_client_op(pseudo_op_t op, int access, int fd, int dirfd, const char *path
 				return 0;
 			}
 		}
-		memcpy(alloced_path, path, partial_len);
-		alloced_path[partial_len] = '\0';
-		memcpy(alloced_path + partial_len + 1, path_extra_1, path_extra_1len);
-		alloced_path[partial_len + path_extra_1len + 1] = '\0';
+		if (pathlen) {
+			memcpy(alloced_path, path, partial_len - 1);
+		}
+		alloced_path[partial_len - 1] = '\0';
+		memcpy(alloced_path + partial_len, path_extra_1, path_extra_1len);
+		alloced_path[partial_len + path_extra_1len] = '\0';
 		if (path_extra_2) {
-			memcpy(alloced_path + partial_len + path_extra_1len + 2, path_extra_2, path_extra_2len);
+			memcpy(alloced_path + partial_len + path_extra_1len + 1, path_extra_2, path_extra_2len);
 		}
 		alloced_path[full_len - 1] = '\0';
 		path = alloced_path;
