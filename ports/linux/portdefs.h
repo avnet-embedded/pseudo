@@ -34,6 +34,7 @@ GLIBC_COMPAT_SYMBOL(memcpy,2.0);
 #include <sys/syscall.h>
 #include <sys/prctl.h>
 #include <linux/seccomp.h>
+#include <sys/mount.h>
 #include <linux/mount.h>
 
 /* close_range()'s flags, and unshare(), are only declared by glibc under
