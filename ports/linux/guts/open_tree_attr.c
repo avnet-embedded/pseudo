@@ -18,6 +18,15 @@
 		pseudo_diag("ERROR: OPEN_TREE_CLONE is not supported\n");
 	}
 
+	/* This wrapper is not called with modified paths, therefore we have to handle this ourselves.
+	   We can't use the standard mappings since the function needs relative paths to be preserved,
+	   they can't be our usual absolute paths. An example difference:
+	   open_tree_attr(dirfd, "/dir1/dir2", 0, NULL, 0) = -1 ENOENT (No such file or directory)
+	   vs.
+	   open_tree_attr(dirfd, "dir1/dir2", 0, NULL, 0) = 4
+	   FIXME - we don't handle chroot for relative paths
+	*/
+	pseudo_path = pseudo_root_path(__func__, __LINE__, dirfd, path, 0);
 	if (path && path[0] == '/') {
 		/* If the path is absolute, we should account for a potential chroot */
 		path = pseudo_path;
@@ -34,8 +43,6 @@
 	if (rc != -1) {
 		save_errno = errno;
 		int stat_rc;
-
-		pseudo_path = pseudo_root_path(__func__, __LINE__, dirfd, path, 0);
 
 		stat_rc = real___fxstatat64(_STAT_VER, dirfd, pseudo_path, &buf, (flags & AT_SYMLINK_NOFOLLOW) ? AT_SYMLINK_NOFOLLOW : 0);
 
