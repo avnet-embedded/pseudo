@@ -170,7 +170,10 @@ pseudo_io_uring_wanted_mode(void)
 	if (!env)
 		return mode;
 
-	value = strtol(env, &end, 10);
+	/* _GNU_SOURCE turns this into __isoc23_strtol() on
+	 * glibc 2.38 and later
+	 */
+	value = pseudo_strtol_wrapper(env, &end, 10);
 	if (end != env && !*end && value >= 0 &&
 	    value <= PSEUDO_IO_URING_MODE_LAST) {
 		mode = (enum pseudo_io_uring_mode) value;
