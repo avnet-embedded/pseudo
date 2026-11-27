@@ -78,6 +78,14 @@ Guidance for AI agents working in the `pseudo` repository.
   `ports/<port>/portdefs.h`.  Where shared code needs something only one
   port provides, fail with `#error` for other ports rather than silently
   falling back.
+- Never call `strtol`, `strtoll`, `atoi`, `sscanf` or `fscanf` directly
+  in client code (anything linked into libpseudo.so, especially files
+  built with `_GNU_SOURCE` such as pseudo_wrappers.c and the guts/port
+  files it includes).  With glibc 2.38+, `_GNU_SOURCE` redirects them to
+  `__isoc23_*` symbols, which break on older glibc hosts.  Use
+  `pseudo_strtol_wrapper`, `pseudo_strtoll_wrapper` or
+  `pseudo_atoi_wrapper` (strtol.c), and put any scanf use in
+  pseudo_client_scanf.c; both are built without `_GNU_SOURCE`.
 - Keep pseudo.1 and README.security in step with behaviour changes:
   options, environment variables, diagnostics, security model.
 
